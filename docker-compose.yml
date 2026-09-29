@@ -1,0 +1,26 @@
+# docker-compose.yml (repo ROOT)
+# Day 1 version: uses the Part 1 v1.0 images so we can learn the workflow.
+# It is switched to v2.0 images on Day 5 (mandatory: image from Docker Hub, not build).
+# Attribution: adapted from the lecturer's Docker Compose notes (IIE, 2026);
+# service structure from Docker (2026f).
+services:
+  azurite:
+    image: st10482062/coffeenchill-azurite:v1.0
+    container_name: coffeenchill-azurite-compose
+    command: azurite --skipApiVersionCheck --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
+    ports:
+      - "10000:10000"   # Blob
+      - "10001:10001"   # Queue
+      - "10002:10002"   # Table
+
+  functions:
+    image: st10482062/coffeenchill-functions:v1.0
+    container_name: coffeenchill-functions-compose
+    ports:
+      - "7071:80"
+    environment:
+      FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
+      # "azurite" is the service name, not localhost. Inside a container localhost means the container itself.
+      AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+    depends_on:
+      - azurite
