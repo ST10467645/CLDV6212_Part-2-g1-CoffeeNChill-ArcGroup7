@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="CoffeeNChill Part 1.postman_collection" />
+    <File Path="docker-commands.md" />
+    <File Path="docs/CoffeeNChill Part 1.postman_collection.json" />
+    <File Path="Local Azurite.postman_environment.json" />
+  </Folder>
+  <Project Path="CoffeeNChillFunctions.csproj" />
+</Solution>
