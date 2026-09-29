@@ -1,0 +1,9 @@
+{
+  "version": "2.0",
+  "extensions": {
+    "queues": {
+      "messageEncoding": "base64"
+    }
+  },
+  "telemetryMode": "OpenTelemetry"
+}

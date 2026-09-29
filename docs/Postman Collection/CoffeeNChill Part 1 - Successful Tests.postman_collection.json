@@ -1,0 +1,396 @@
+{
+  "info": {
+    "_postman_id": "070c94c4-7872-4fb8-9ca5-866f29d2a57b",
+    "name": "CoffeeNChill Part 1 - Successful Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57297058"
+  },
+  "item": [
+    {
+      "name": "Menu - Successful Tests",
+      "item": [
+        {
+          "name": "Create Menu Item - Successful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test script attribution: pattern adapted from Postman's official documentation:\r",
+                  "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
+                  "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "// [Accessed: 01-Sep-2026].\r",
+                  "pm.test(\"Status code is successful\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"partitionKey\": \"Hot Drinks\",\r\n  \"rowKey\": \"COF-004\",\r\n  \"name\": \"Spanish Latte\",\r\n  \"description\": \"Espresso with condensed milk\",\r\n  \"price\": 30.00,\r\n  \"isAvailable\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Menu Items - Successful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test script attribution: pattern adapted from Postman's official documentation:\r",
+                  "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
+                  "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "// [Accessed: 01-Sep-2026].\r",
+                  "pm.test(\"Status code is successful\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Menu Items By Category - Successful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test script attribution: pattern adapted from Postman's official documentation:\r",
+                  "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
+                  "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "// [Accessed: 01-Sep-2026].\r",
+                  "pm.test(\"Status code is successful\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menu/category/Hot%20Drinks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "category",
+                "Hot%20Drinks"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Menu Item - Successful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test script attribution: pattern adapted from Postman's official documentation:\r",
+                  "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
+                  "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "// [Accessed: 01-Sep-2026].\r",
+                  "pm.test(\"Status code is successful\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"partitionKey\": \"Hot Drinks\",\r\n  \"rowKey\": \"COF-003\",\r\n  \"name\": \"Flat White\",\r\n  \"description\": \"Espresso with velvety steamed milk\",\r\n  \"price\": 33.00,\r\n  \"isAvailable\": false\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu/Hot%20Drinks/COF-007",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "Hot%20Drinks",
+                "COF-007"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Menu Item - Successful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test script attribution: pattern adapted from Postman's official documentation:\r",
+                  "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
+                  "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "// [Accessed: 01-Sep-2026].\r",
+                  "pm.test(\"Status code is successful\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menu/Hot%20Drinks/COF-003",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu",
+                "Hot%20Drinks",
+                "COF-003"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documents - Successful Tests",
+      "item": [
+        {
+          "name": "Upload Staff Document - Successful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "   // Test script attribution: pattern adapted from Postman's official documentation:\r",
+                  "   // Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
+                  "   // https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "   // [Accessed: 01-Sep-2026].\r",
+                  "   pm.test(\"Status code is successful\", function () {\r",
+                  "       pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "   });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "description": "chocolate chip cookie test data",
+                  "type": "file",
+                  "uuid": "fe3ff3b7-313a-4ff1-beca-c0ce9a2c3c17",
+                  "src": "/C:/Users/emeris/OneDrive - ADvTECH Ltd/Desktop/Documents/Kandyce Jade Smit's files - Part 1 (Shared)/Member folders/Kristen/Test Documents/ChocolateChipCookies_testdata.pdf"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                "upload"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Staff Documents  - Successful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test script attribution: pattern adapted from Postman's official documentation:\r",
+                  "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
+                  "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "// [Accessed: 01-Sep-2026].\r",
+                  "   pm.test(\"Status code is successful\", function () {\r",
+                  "       pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "   });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Staff Document  - Successful",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test script attribution: pattern adapted from Postman's official documentation:\r",
+                  "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
+                  "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "// [Accessed: 01-Sep-2026].\r",
+                  "   pm.test(\"Status code is successful\", function () {\r",
+                  "       pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+                  "   });"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents/download/ChocolateChipCookies_testdata.pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                "download",
+                "ChocolateChipCookies_testdata.pdf"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check - Successful Tests",
+      "item": [
+        {
+          "name": "Confirm API is reachable",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test script attribution: pattern adapted from Postman's official\r",
+                  "// documentation:\r",
+                  "// Postman Inc., \"Write scripts to test API responses,\" Postman\r",
+                  "// Learning Center, 2025. [Online]. Available:\r",
+                  "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
+                  "// [Accessed: 01-Sep-2026].\r",
+                  "pm.test(\"API is reachable\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "menu"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
