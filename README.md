@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CoffeeNChill Canteen Management System - Part 1
 
 ## Group number and members
