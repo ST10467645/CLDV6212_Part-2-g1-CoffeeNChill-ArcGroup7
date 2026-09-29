@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "CLDVD6212_POE_Example_AssignmentSubmissionEx": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7088",
-      "launchBrowser": false
-    }
-  }
-}
