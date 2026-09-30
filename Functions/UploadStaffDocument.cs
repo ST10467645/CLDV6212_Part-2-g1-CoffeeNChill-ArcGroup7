@@ -1,4 +1,5 @@
-﻿// Code attribution: multipart-form parsing pattern adapted from Microsoft's MultipartReader documentation:
+﻿// Uploads a staff document (PDF, PNG or JPEG) from a multipart/form-data request into the "staff-docs" blob container.
+// Code attribution: multipart-form parsing pattern adapted from Microsoft's MultipartReader documentation:
 // Microsoft, "MultipartReader Class," Microsoft Learn, 2025.
 // https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.webutilities.multipartreader
 // [Accessed: 26-Aug-2026].
