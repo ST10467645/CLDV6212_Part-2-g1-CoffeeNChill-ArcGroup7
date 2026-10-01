@@ -1,6 +1,6 @@
 ﻿// This is my function for updating the status of an order. It runs when someone sends a PUT request only.
-//Right now it only finds the order and checks the new status. Saving the new status gets added later.
-// attribution: the structure (constructor with the table client, reading the status from the body, catching the 404 error) was adapted from the lecturer's UpdateStudentQueryStatus example.
+//Right now it only finds the order and checks the new status is a correct, the next step and then saves it.
+// attribution: the structure (constructor with the table client, reading the status from the body, catching the 404 error, updating the row with its ETag) was adapted from the lecturer's UpdateStudentQueryStatus example.
 
 //The HTTP trigger makes the function run on a web request. Here it only accepts PUT.
 //Reference: Microsoft, "Azure Functions HTTP trigger," Microsoft Learn, 2026.
@@ -70,15 +70,34 @@ namespace CoffeeNChillFunctions.Functions
                     return response;
                 }
 
-                //in later commit i will check the OrderStatus.IsNextStep and save the new status to the table.
-                //For now I only send back what I found so I can test the route in Postman.
+                //400 if the new status is not the next step in the order( Received > Preparing > Ready > Collected)
+                //For example Received can only go to Preparing, and Collected can't go anywhere.
+                if (!OrderStatus.IsNextStep(order.Value.Status, newStatus))
+                {
+                    _logger.LogWarning("Order {OrderId} can't go from {OldStatus} to {NewStatus}", orderId, order.Value.Status, newStatus);
+
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    await response.WriteStringAsync($"Not allowed. {order.Value.Status} can't go to {newStatus}.");
+                    return response;
+                }
+
+                //Keep the old status for the log, then change the row
+                string oldStatus = order.Value.Status;
+                order.Value.Status = newStatus;
+                order.Value.LastUpdated = DateTime.UtcNow.ToString("o");
+
+                //Saves the row. The ETag makes sure nobody else changed it while I was working on it.
+                await _ordersTable.UpdateEntityAsync(order.Value, order.Value.ETag);
+
+                _logger.LogInformation("STATUS UPDATED: Order {OrderId} went from {OldStatus} to {NewStatus}", orderId, oldStatus, newStatus);
+
                 response.StatusCode = HttpStatusCode.OK;
                 await response.WriteAsJsonAsync(new
                 {
-                    message = "Order found. Status not saved yet.",
+                    message = "Order status updated successfully",
                     orderId = orderId,
-                    currentStatus = order.Value.Status,
-                    requestedStatus = newStatus
+                    oldStatus = oldStatus,
+                    status = newStatus
                 });
                 return response;
             }
