@@ -1,11 +1,10 @@
 ﻿// Queue PRODUCER: validates an order, turns it into JSON and places it on order-processing-queue.
 // The customer gets an instant 202 Accepted; the order is processed later by ProcessOrderQueue.
 //
-// Attribution:
-// - HTTP trigger and queue producer pattern adapted from the lecturer's SubmitStudentQuery example
-//   and the HTTP trigger documentation (Microsoft Learn, 2025b).
-// - QueueClient and Base64 message encoding per Microsoft Learn (2026h).
-// - Trigger-side queue rules (message encoding) per Microsoft Learn (2026g).
+// Attribution: HTTP trigger and queue producer pattern adapted from the lecturer's examples (IIE, 2026)
+// and the HTTP trigger documentation (Microsoft Learn, 2025b); QueueClient and Base64 message encoding
+// per the Queues client library documentation (Microsoft Learn, 2026h); trigger-side queue rules
+// per the Queue storage trigger documentation (Microsoft Learn, 2026g).
 using Azure;
 using Azure.Storage.Queues;
 using Microsoft.Azure.Functions.Worker;
@@ -20,12 +19,10 @@ namespace CoffeeNChillFunctions.Functions
     // Defines the Azure Function that accepts a new order and places it on the order queue.
     public class SubmitOrder
     {
-        // The queue name is kept in one place so it always matches the trigger in ProcessOrderQueue.
         private const string QueueName = "order-processing-queue";
 
         private readonly ILogger _logger;
 
-        // The Functions host provides the logger.
         public SubmitOrder(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<SubmitOrder>();
@@ -38,7 +35,7 @@ namespace CoffeeNChillFunctions.Functions
         {
             try
             {
-                // Reads the request body as text.
+                // Reading the request body as text.
                 string body = await new StreamReader(req.Body).ReadToEndAsync();
 
                 if (string.IsNullOrWhiteSpace(body))
@@ -47,7 +44,7 @@ namespace CoffeeNChillFunctions.Functions
                         new { errors = new[] { "Request body is empty." } });
                 }
 
-                // Converts the JSON text into an Order object.
+                // Converting the JSON text into an Order object.
                 Order? order;
                 try
                 {
@@ -66,11 +63,8 @@ namespace CoffeeNChillFunctions.Functions
                         new { errors = new[] { "Order could not be read." } });
                 }
 
-                // Validates every field and collects ALL problems so the client can fix them in one go.
+                // Validating every field and collecting all problems so the client can fix them in one go.
                 var errors = new List<string>();
-
-                if (string.IsNullOrWhiteSpace(order.OrderId))
-                    errors.Add("OrderId is required.");
 
                 if (string.IsNullOrWhiteSpace(order.CustomerName))
                     errors.Add("CustomerName is required.");
@@ -89,36 +83,66 @@ namespace CoffeeNChillFunctions.Functions
                     return await WriteJson(req, HttpStatusCode.BadRequest, new { errors });
                 }
 
-                // Serialises the validated order into a JSON string.
+                // Server-generated values:
+                // OrderId looks like ORD-2026-A1B2C3; the timestamp is the current UTC time.
+                if (string.IsNullOrWhiteSpace(order.OrderId))
+                {
+                    order.OrderId = $"ORD-{DateTime.UtcNow:yyyy}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
+                }
+
+                if (order.OrderTimestamp == default)
+                {
+                    order.OrderTimestamp = DateTime.UtcNow;
+                }
+
+                order.CustomerName = order.CustomerName.Trim();
+
+                // Serialising the validated order into a JSON string (the queue message).
                 string messageJson = JsonSerializer.Serialize(order);
 
                 // Connecting to the queue.
                 string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true";
-                var queueClient = new QueueClient(connectionString, QueueName,
-                    new QueueClientOptions { MessageEncoding = QueueMessageEncoding.Base64 });
+                var options = new QueueClientOptions { MessageEncoding = QueueMessageEncoding.Base64 };
 
-                // Creates the queue the first time it is used.
+                // Failing fast if the queue is unreachable instead of waiting a long time.
+                options.Retry.MaxRetries = 1;
+                options.Retry.Delay = TimeSpan.FromMilliseconds(500);
+                options.Retry.NetworkTimeout = TimeSpan.FromSeconds(5);
+
+                var queueClient = new QueueClient(connectionString, QueueName, options);
+
+                // Creating the queue the first time it is used, then places the order on it.
                 await queueClient.CreateIfNotExistsAsync();
-
-                // Places the order on the queue.
                 await queueClient.SendMessageAsync(messageJson);
 
                 _logger.LogInformation("Order {OrderId} placed on {Queue}.", order.OrderId, QueueName);
 
-                // 202 Accepted message.
-                return await WriteJson(req, HttpStatusCode.Accepted,
-                    new { message = "Order accepted and queued for processing.", orderId = order.OrderId });
+                // 202 Accepted means (received and will be processed later).
+                return await WriteJson(req, HttpStatusCode.Accepted, new
+                {
+                    message = "Order accepted and queued for processing.",
+                    orderId = order.OrderId,
+                    orderDate = order.OrderTimestamp.ToString("yyyy-MM-dd")
+                });
             }
             catch (RequestFailedException ex)
             {
-                // Messafe for storage or queue connection problem 
+                // Azure Storage error message.
                 _logger.LogError(ex, "Azure Queue error while placing the order.");
                 return await WriteJson(req, HttpStatusCode.ServiceUnavailable,
                     new { error = $"Queue unavailable: {ex.ErrorCode} - {ex.Message}" });
             }
+            catch (Exception ex) when (ex is AggregateException || ex is HttpRequestException ||
+                                       ex is TimeoutException || ex is OperationCanceledException)
+            {
+                // If queue could not be reached at all (for example Azurite is stopped).
+                _logger.LogError(ex, "Queue storage is not reachable.");
+                return await WriteJson(req, HttpStatusCode.ServiceUnavailable,
+                    new { error = "Queue storage is not reachable. Please try again shortly." });
+            }
             catch (Exception ex)
             {
-                // Returning a clean 500 instead of crashing for any other unexpected error.
+                // Returning a clean 500 instead of crashing for any other unexpected error .
                 _logger.LogError(ex, "Unexpected error while placing the order.");
                 return await WriteJson(req, HttpStatusCode.InternalServerError,
                     new { error = $"Error: {ex.Message}" });
