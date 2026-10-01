@@ -1,5 +1,6 @@
 ﻿// Here I made a queue triggered function. It runs by itself whenever a new message arrives on the order-processing-queue.
 // It reads the order, saves it to the Orders table as Received, then moves it through Preparing, Ready and Collected.
+// If something goes wrong it throws an error so the message is retried and then moved to the poison queue.
 // Attribution: the [Function] and [QueueTrigger(..., Connection = "AzureWebJobsStorage")] pattern was adapted from the lecturer's ProcessStudentQuery example and Microsoft Learn (2026).
 //https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-csharp
 //[Accessed: 29-Sep-2026].
@@ -22,6 +23,14 @@
 //UpsertEntityAsync saves the same row again with the new status.
 //Reference: Microsoft, "TableClient.UpsertEntityAsync Method," Microsoft Learn, 2026.
 //https://learn.microsoft.com/en-us/dotnet/api/azure.data.tables.tableclient.upsertentityasync
+//[Accessed: 01-Oct-2026].
+//Azure retries a queue message that throws an error. After 5 tries it moves the message to a poison queue called <queue name>-poison.
+//Reference: Microsoft, "Azure Queue storage trigger for Azure Functions - Poison messages," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger
+//[Accessed: 01-Oct-2026].
+//Environment.GetEnvironmentVariable reads a setting by its name.
+//Reference: Microsoft, "Environment.GetEnvironmentVariable Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/system.environment.getenvironmentvariable
 //[Accessed: 01-Oct-2026].
 
 using Azure.Data.Tables;
@@ -74,6 +83,18 @@ namespace CoffeeNChillFunctions.Functions
             _logger.LogInformation("Message text: {Message}", queueMessage);
             _logger.LogInformation("=================================");
 
+            //Test switch for the poison queue demo. It is false unless I set ENABLE_POISON_TEST to true.
+            //When it is true the function breaks on purpose so the message ends up in order-processing-queue-poison.
+            string poisonTest = Environment.GetEnvironmentVariable("ENABLE_POISON_TEST") ?? "false";
+
+            //checking if the poison test is true then the following happen:
+            if (string.Equals(poisonTest, "true", StringComparison.OrdinalIgnoreCase))
+            {
+                //tells the user exactly which message went bad
+                _logger.LogError("TEST ERROR - forcing poison queue for message: {Message}", queueMessage);
+                throw new InvalidOperationException("TEST ERROR - forcing poison queue");
+            }
+
             //Turns the JSON text into an Order object, capital letters in the names don't matter
             var order = JsonSerializer.Deserialize<Order>(queueMessage, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -81,7 +102,8 @@ namespace CoffeeNChillFunctions.Functions
             //Throwing makes the message retry and then move to the poison queue.
             if (order == null || string.IsNullOrWhiteSpace(order.OrderId) || order.SelectedItemSKUs == null || order.SelectedItemSKUs.Count == 0)
             {
-                _logger.LogError("Unable to process order: it is empty or the OrderId or items are missing.");
+                //tells the user exactly which message went bad
+                _logger.LogError("Unable to process order, sending it to the poison queue. Message: {Message}", queueMessage);
                 throw new InvalidOperationException("Unable to deserialize a valid order.");
             }
 
