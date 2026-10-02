@@ -1,6 +1,6 @@
 ﻿// Here I made a queue triggered function. It runs by itself whenever a new message arrives on the order-processing-queue.
-// For now it only prints the message so I can check that the trigger works.
-// The real order processing gets added in the next commits.
+// It reads the order, saves it to the Orders table as Received, then moves it through Preparing, Ready and Collected.
+// If something goes wrong it throws an error so the message is retried and then moved to the poison queue.
 // Attribution: the [Function] and [QueueTrigger(..., Connection = "AzureWebJobsStorage")] pattern was adapted from the lecturer's ProcessStudentQuery example and Microsoft Learn (2026).
 //https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-csharp
 //[Accessed: 29-Sep-2026].
@@ -15,6 +15,24 @@
 //Reference: Microsoft, "String.Join Method," Microsoft Learn, 2026.
 //https://learn.microsoft.com/en-us/dotnet/api/system.string.join
 //[Accessed: 30-Sep-2026].
+
+//Task.Delay makes the function wait without freezing  it. I use it to pretend the barista needs time to make the order.
+//Reference: Microsoft, "Task.Delay Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.delay
+//[Accessed: 01-Oct-2026].
+//UpsertEntityAsync saves the same row again with the new status.
+//Reference: Microsoft, "TableClient.UpsertEntityAsync Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/azure.data.tables.tableclient.upsertentityasync
+//[Accessed: 01-Oct-2026].
+//Azure retries a queue message that throws an error. After 5 tries it moves the message to a poison queue called <queue name>-poison.
+//Reference: Microsoft, "Azure Queue storage trigger for Azure Functions - Poison messages," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger
+//[Accessed: 01-Oct-2026].
+//Environment.GetEnvironmentVariable reads a setting by its name.
+//Reference: Microsoft, "Environment.GetEnvironmentVariable Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/system.environment.getenvironmentvariable
+//[Accessed: 01-Oct-2026].
+
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;
 using Microsoft.Azure.Functions.Worker;
@@ -30,6 +48,10 @@ namespace CoffeeNChillFunctions.Functions
 
         //This is the client I use to read and write the Orders table
         private readonly TableClient _ordersTable;
+
+        //How many seconds the order waits before the next status.
+        //3 seconds and 3 changes equals 9 seconds making it under the 30 second limit.
+        private const int StepDelaySeconds = 3;
 
         //The Functions host gives us the logger automatically (dependency injection) so I don't have to create it myself
         public ProcessOrderQueue(ILoggerFactory loggerFactory)
@@ -61,6 +83,18 @@ namespace CoffeeNChillFunctions.Functions
             _logger.LogInformation("Message text: {Message}", queueMessage);
             _logger.LogInformation("=================================");
 
+            //Test switch for the poison queue demo. It is false unless I set ENABLE_POISON_TEST to true.
+            //When it is true the function breaks on purpose so the message ends up in order-processing-queue-poison.
+            string poisonTest = Environment.GetEnvironmentVariable("ENABLE_POISON_TEST") ?? "false";
+
+            //checking if the poison test is true then the following happen:
+            if (string.Equals(poisonTest, "true", StringComparison.OrdinalIgnoreCase))
+            {
+                //tells the user exactly which message went bad
+                _logger.LogError("TEST ERROR - forcing poison queue for message: {Message}", queueMessage);
+                throw new InvalidOperationException("TEST ERROR - forcing poison queue");
+            }
+
             //Turns the JSON text into an Order object, capital letters in the names don't matter
             var order = JsonSerializer.Deserialize<Order>(queueMessage, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -68,15 +102,15 @@ namespace CoffeeNChillFunctions.Functions
             //Throwing makes the message retry and then move to the poison queue.
             if (order == null || string.IsNullOrWhiteSpace(order.OrderId) || order.SelectedItemSKUs == null || order.SelectedItemSKUs.Count == 0)
             {
-                _logger.LogError("Unable to process order: it is empty or the OrderId or items are missing.");
+                //tells the user exactly which message went bad
+                _logger.LogError("Unable to process order, sending it to the poison queue. Message: {Message}", queueMessage);
                 throw new InvalidOperationException("Unable to deserialize a valid order.");
             }
 
             //Uses the order date for the PartitionKey. If no timestamp was sent it gives the current time.
             //The ?: operator picks one of two values depending on the condition(what the user entered, or the current time).
-            //https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator
             DateTime orderDate = order.OrderTimestamp == default ? DateTime.UtcNow : order.OrderTimestamp;
-            
+
             //Builds the row for the Orders table
             var entity = new OrderEntity
             {
@@ -85,7 +119,6 @@ namespace CoffeeNChillFunctions.Functions
                 CustomerName = order.CustomerName,
                 //A table column can't hold a list, so the SKUs are joined into one text value like "COF-001,PAS-104".
                 //String.Join puts a separator between each item in the list.
-                //https://learn.microsoft.com/en-us/dotnet/api/system.string.join
                 SelectedItemSKUs = string.Join(",", order.SelectedItemSKUs),
                 TotalPrice = order.TotalPrice,
                 OrderTimestamp = orderDate.ToString("o"),
@@ -102,6 +135,38 @@ namespace CoffeeNChillFunctions.Functions
             _logger.LogInformation("Customer: {Customer}", entity.CustomerName);
             _logger.LogInformation("Status: {Status}", entity.Status);
             _logger.LogInformation("=================================");
+
+            //Now I pretend the barista is busy with the order.
+            //I wait a few seconds, then change the status in the Orders table.
+            //It goes in this order: Received > Preparing > Ready > Collected
+            await Task.Delay(TimeSpan.FromSeconds(StepDelaySeconds));
+            await ChangeStatusAsync(entity, OrderStatus.Preparing);
+
+            await Task.Delay(TimeSpan.FromSeconds(StepDelaySeconds));
+            await ChangeStatusAsync(entity, OrderStatus.Ready);
+
+            await Task.Delay(TimeSpan.FromSeconds(StepDelaySeconds));
+            await ChangeStatusAsync(entity, OrderStatus.Collected);
+
+            _logger.LogInformation("=================================");
+            _logger.LogInformation("ORDER FINISHED: {OrderId} is now {Status}", entity.RowKey, entity.Status);
+            _logger.LogInformation("=================================");
+        }
+
+        //I made this method so I don't have to copy and paste the same update code three times.
+        //It changes the status, updates LastUpdated, saves the row and writes a log line.
+        private async Task ChangeStatusAsync(OrderEntity entity, string newStatus)
+        {
+            //Keep the old status so the log can say what it changed from
+            string oldStatus = entity.Status;
+
+            entity.Status = newStatus;
+            entity.LastUpdated = DateTime.UtcNow.ToString("o");
+
+            //Upsert saves the changed row back into the Orders table
+            await _ordersTable.UpsertEntityAsync(entity);
+
+            _logger.LogInformation("STATUS CHANGED: Order {OrderId} went from {OldStatus} to {NewStatus}", entity.RowKey, oldStatus, newStatus);
         }
     }
 }
