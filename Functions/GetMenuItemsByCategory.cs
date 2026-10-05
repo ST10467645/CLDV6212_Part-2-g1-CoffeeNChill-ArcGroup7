@@ -1,9 +1,5 @@
-// Code attribution: filtered Table Storage query pattern adapted from
-// lecturer-provided course example (CLDV6212, IIE, 2026) and Microsoft's
-// official documentation:
-// Microsoft, "Understand the Azure Table storage data model," Microsoft Learn, 2025. 
-// https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-overview
-// [Accessed: 27-Aug-2026].
+// Attribution: filtered Table Storage query pattern adapted from the lecturer's course example (IIE, 2026)
+// and the Azure Table storage overview (Microsoft Learn, 2022).
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
