@@ -34,6 +34,20 @@ docker tag st10482062/coffeenchill-azurite:v1.0 st10482062/coffeenchill-azurite:
 docker push st10482062/coffeenchill-azurite:v2.0
 ```
 
+### Build and push the Functions v2.0 image
+```
+docker build -t st10482062/coffeenchill-functions:v2.0 .
+docker push st10482062/coffeenchill-functions:v2.0
+```
+
+### Remove and re-pull v2.0 images (shows Compose pulling from Docker Hub)
+```
+docker compose down
+docker rmi st10482062/coffeenchill-functions:v2.0
+docker rmi st10482062/coffeenchill-azurite:v2.0
+docker compose up
+```
+
 Hostname rule: inside the compose network use the service name `azurite`, never `localhost`.
 
 Reference: Docker (2026e; 2026g).
