@@ -1,8 +1,5 @@
-﻿// Code attribution: entity model pattern adapted from lecturer provided course example and Microsoft's official
-// Azure.Data.Tables documentation:
-// Microsoft, "Azure Tables client library for .NET," Microsoft Learn,6 May 2025.
-// https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
-// [Accessed: 26-Aug-2026].
+﻿// Attribution: entity model pattern adapted from the lecturer's course example (IIE, 2026)
+// and the Azure Tables client library documentation (Microsoft Learn, 2026c).
 using Azure;
 using Azure.Data.Tables;
 
