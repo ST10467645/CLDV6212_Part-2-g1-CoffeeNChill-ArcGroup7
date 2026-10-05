@@ -2,21 +2,6 @@
 
 **Module:** CLDV6212 (Cloud Development B) | **Group 7 (ARC)** | **Current submission: Part 2 (Queue Triggers & Docker Compose)**
 
-> **DELETE THIS BOX ON DAY 9.** Progress tracker (update a row when it is merged to `main`):
->
-> | Part 2 item | Owner | Status |
-> |---|---|---|
-> | Models, `host.json` Base64, queue packages | Kandyce | Done |
-> | `SubmitOrder` producer (validation + Base64) | Kandyce | Done |
-> | Server-generated OrderId/timestamp, queue error handling | Kandyce | Done |
-> | `GetOrders`, `GetOrderById` | Kandyce | Done |
-> | `ProcessOrderQueue` trigger + Received row | Kristen | Done |
-> | Status simulation (Preparing, Ready, Collected) | Kristen | Day 3 |
-> | `UpdateOrderStatus`, poison handling | Kristen | Day 4 |
-> | Compose file, network, volume | Thami | Done |
-> | Docker Hub `v2.0` images + compose switch | Thami | Day 3 and Day 5 |
-> | Postman Part 2 tests, video, PDF | All | Days 6–9 |
-
 ## Group Members
 | Name | Student Number |
 |---|---|
