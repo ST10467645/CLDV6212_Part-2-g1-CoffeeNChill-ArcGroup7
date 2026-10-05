@@ -1,6 +1,6 @@
 ﻿// This is my function for updating the status of an order. It runs when someone sends a PUT request only.
-//Right now it only finds the order and checks the new status is a correct, the next step and then saves it.
-// attribution: the structure (constructor with the table client, reading the status from the body, catching the 404 error, updating the row with its ETag) was adapted from the lecturer's UpdateStudentQueryStatus example.
+// The body is JSON, for example {"Status":"Preparing"}. It finds the order, checks the new status is correct and the next step, then saves it.
+// Attribution: the structure (constructor with the table client, reading the status from the body, catching the 404 error, updating the row with its ETag) was adapted from the lecturer's UpdateStudentQueryStatus example (IIE, 2026).
 
 //The HTTP trigger makes the function run on a web request. Here it only accepts PUT.
 //Reference: Microsoft, "Azure Functions HTTP trigger," Microsoft Learn, 2026.
@@ -10,6 +10,15 @@
 //Reference: Microsoft, "RequestFailedException Class," Microsoft Learn, 2026.
 //https://learn.microsoft.com/en-us/dotnet/api/azure.requestfailedexception
 //[Accessed: 01-Oct-2026].
+
+//JsonSerializer.Deserialize turns the JSON text from the body into a C# object.
+//Reference: Microsoft, "JsonSerializer.Deserialize Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializer.deserialize
+//[Accessed: 05-Oct-2026].
+//StreamReader.ReadToEndAsync reads the whole request body as text.
+//Reference: Microsoft, "StreamReader.ReadToEndAsync Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader.readtoendasync
+//[Accessed: 05-Oct-2026].
 using Azure;
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;
@@ -17,6 +26,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Text.Json;
 
 namespace CoffeeNChillFunctions.Functions
 {
@@ -25,8 +35,14 @@ namespace CoffeeNChillFunctions.Functions
         //The logger so I can write to the console in the Run method
         private readonly ILogger _logger;
 
-        //The client I use to read the Orders table
+        //The client I use to read and update the Orders table
         private readonly TableClient _ordersTable;
+
+        //The JSON body the client sends, for example {"Status":"Preparing"}
+        private class StatusRequest
+        {
+            public string? Status { get; set; }
+        }
 
         public UpdateOrderStatus(ILoggerFactory loggerFactory)
         {
@@ -53,12 +69,30 @@ namespace CoffeeNChillFunctions.Functions
 
             try
             {
-                //Look for the order. If it isn't there, Azure throws a 404 error which I catch below.
-                var order = await _ordersTable.GetEntityAsync<OrderEntity>(orderDate, orderId);
+                //Read the body as JSON so the Postman tests can send {"Status":"Preparing"}.
+                //400 if it is empty.
+                string body = await new StreamReader(req.Body).ReadToEndAsync();
+                if (string.IsNullOrWhiteSpace(body))
+                {
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    await response.WriteAsJsonAsync(new { error = "Request body is empty. Send {\"Status\":\"Preparing\"}." });
+                    return response;
+                }
 
-                //The new status comes in the body as plain text, for example: Preparing
-                string newStatus = await new StreamReader(req.Body).ReadToEndAsync();
-                newStatus = newStatus.Trim();
+                //Turn the JSON text into a StatusRequest, 400 if the JSON is broken.
+                StatusRequest? request;
+                try
+                {
+                    request = JsonSerializer.Deserialize<StatusRequest>(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                catch (JsonException)
+                {
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    await response.WriteAsJsonAsync(new { error = "Request body is not valid JSON." });
+                    return response;
+                }
+
+                string newStatus = request?.Status?.Trim() ?? "";
 
                 //400 if the status is not Received, Preparing, Ready or Collected
                 if (!OrderStatus.IsValid(newStatus))
@@ -66,9 +100,12 @@ namespace CoffeeNChillFunctions.Functions
                     _logger.LogWarning("Bad status '{NewStatus}' sent for order {OrderId}", newStatus, orderId);
 
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteStringAsync("Invalid status. Use Received, Preparing, Ready or Collected.");
+                    await response.WriteAsJsonAsync(new { error = "Status must be one of: Received, Preparing, Ready, Collected." });
                     return response;
                 }
+
+                //Look for the order. If it isn't there, Azure throws a 404 error which I catch below.
+                var order = await _ordersTable.GetEntityAsync<OrderEntity>(orderDate, orderId);
 
                 //400 if the new status is not the next step in the order( Received > Preparing > Ready > Collected)
                 //For example Received can only go to Preparing, and Collected can't go anywhere.
@@ -77,7 +114,7 @@ namespace CoffeeNChillFunctions.Functions
                     _logger.LogWarning("Order {OrderId} can't go from {OldStatus} to {NewStatus}", orderId, order.Value.Status, newStatus);
 
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteStringAsync($"Not allowed. {order.Value.Status} can't go to {newStatus}.");
+                    await response.WriteAsJsonAsync(new { error = $"Not allowed. {order.Value.Status} can't go to {newStatus}." });
                     return response;
                 }
 
@@ -91,14 +128,9 @@ namespace CoffeeNChillFunctions.Functions
 
                 _logger.LogInformation("STATUS UPDATED: Order {OrderId} went from {OldStatus} to {NewStatus}", orderId, oldStatus, newStatus);
 
+                //Reply with OrderResponse, the same shape the GET functions use (OrderId, Status, OrderDate)
                 response.StatusCode = HttpStatusCode.OK;
-                await response.WriteAsJsonAsync(new
-                {
-                    message = "Order status updated successfully",
-                    orderId = orderId,
-                    oldStatus = oldStatus,
-                    status = newStatus
-                });
+                await response.WriteAsJsonAsync(OrderResponse.From(order.Value));
                 return response;
             }
             catch (RequestFailedException ex) when (ex.Status == 404)
@@ -107,16 +139,16 @@ namespace CoffeeNChillFunctions.Functions
                 _logger.LogWarning("Order {OrderId} on {OrderDate} was not found", orderId, orderDate);
 
                 response.StatusCode = HttpStatusCode.NotFound;
-                await response.WriteStringAsync("Order not found.");
+                await response.WriteAsJsonAsync(new { error = $"Order '{orderId}' for date '{orderDate}' not found." });
                 return response;
             }
             catch (Exception ex)
             {
-                //Anything else I did not expect 
+                //Anything else I did not expect
                 _logger.LogError(ex, "Something went wrong when updating order {OrderId}", orderId);
 
                 response.StatusCode = HttpStatusCode.InternalServerError;
-                await response.WriteStringAsync($"Error: {ex.Message}");
+                await response.WriteAsJsonAsync(new { error = $"Error: {ex.Message}" });
                 return response;
             }
         }
