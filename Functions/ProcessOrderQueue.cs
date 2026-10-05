@@ -33,6 +33,11 @@
 //https://learn.microsoft.com/en-us/dotnet/api/system.environment.getenvironmentvariable
 //[Accessed: 01-Oct-2026].
 
+//int.TryParse turns the setting text into a number and gives false instead of crashing if it is not a number.
+//Reference: Microsoft, "Int32.TryParse Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/system.int32.tryparse
+//[Accessed: 05-Oct-2026].
+
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;
 using Microsoft.Azure.Functions.Worker;
@@ -49,9 +54,10 @@ namespace CoffeeNChillFunctions.Functions
         //This is the client I use to read and write the Orders table
         private readonly TableClient _ordersTable;
 
-        //How many seconds the order waits before the next status.
-        //3 seconds and 3 changes equals 9 seconds making it under the 30 second limit.
-        private const int StepDelaySeconds = 3;
+        //How many seconds the order waits before the next status. It comes from STATUS_STEP_DELAY_SECONDS.
+        //int.TryParse gives false if the setting is missing or is not a number so then I use 5.
+        //Docker Compose sets it to 10 so each status is easy to see.
+        private static readonly int StepDelaySeconds = int.TryParse(Environment.GetEnvironmentVariable("STATUS_STEP_DELAY_SECONDS"), out var seconds) && seconds >= 0 ? seconds : 5;
 
         //The Functions host gives us the logger automatically (dependency injection) so I don't have to create it myself
         public ProcessOrderQueue(ILoggerFactory loggerFactory)
