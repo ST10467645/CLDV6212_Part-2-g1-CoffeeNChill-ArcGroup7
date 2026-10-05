@@ -1,11 +1,9 @@
 # docker-compose.yml (repo ROOT)
-# Day 2 version: this will add custom bridge network and persistent Azurite data volume.
-# Still uses v1.0 images. Switched to v2.0 on Day 5.
 # Attribution: adapted from the lecturer's Docker Compose notes (IIE, 2026);
 # networks and volumes syntax from Docker (2026e; 2026g).
 services:
   azurite:
-    image: st10482062/coffeenchill-azurite:v1.0
+    image: st10482062/coffeenchill-azurite:v2.0
     container_name: coffeenchill-azurite-compose
     command: azurite --skipApiVersionCheck --location /data --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
     ports:
@@ -16,9 +14,10 @@ services:
       - azurite-data:/data
     networks:
       - coffeenchill-net
+    restart: unless-stopped
 
   functions:
-    image: st10482062/coffeenchill-functions:v1.0
+    image: st10482062/coffeenchill-functions:v2.0
     container_name: coffeenchill-functions-compose
     ports:
       - "7071:80"
@@ -26,10 +25,12 @@ services:
       FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
       # "azurite" is the service name, not localhost.
       AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      ENABLE_POISON_TEST: "false"
     depends_on:
       - azurite
     networks:
       - coffeenchill-net
+    restart: unless-stopped
 
 networks:
   coffeenchill-net:
