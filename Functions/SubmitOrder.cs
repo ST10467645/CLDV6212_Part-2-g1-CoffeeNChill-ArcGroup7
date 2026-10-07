@@ -13,143 +13,143 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
 using CoffeeNChillFunctions.Models;
+using CoffeeNChillFunctions.DTOs;
 
 namespace CoffeeNChillFunctions.Functions
 {
-    // Defines the Azure Function that accepts a new order and places it on the order queue.
+    // Defines the Azure Function responsible for accepting a new order and placing it on the order-processing-queue.
     public class SubmitOrder
     {
+        // Stores the queue name in one place so that it always matches the queue used by the ProcessOrderQueue trigger.
         private const string QueueName = "order-processing-queue";
 
+        // The logger used to write information, warnings and errors to the console.
         private readonly ILogger _logger;
 
+        // The Functions host provides the logger automatically (dependency injection), the same way as in the Part 1 functions.
         public SubmitOrder(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<SubmitOrder>();
         }
 
-        // HTTP POST endpoint at /api/orders/queue.
+        // Exposes this method as an Azure Function that accepts HTTP POST requests through the /orders/queue route.
         [Function("SubmitOrder")]
         public async Task<HttpResponseData> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "orders/queue")] HttpRequestData req)
         {
             try
             {
-                // Reading the request body as text.
+                // Reads the request body so that the submitted JSON data can be converted into a CreateOrderRequest DTO.
                 string body = await new StreamReader(req.Body).ReadToEndAsync();
 
+                // Returns 400 Bad Request when the request body is empty.
                 if (string.IsNullOrWhiteSpace(body))
                 {
                     return await WriteJson(req, HttpStatusCode.BadRequest,
-                        new { errors = new[] { "Request body is empty." } });
+                        new ValidationErrorResponse("Request body is empty."));
                 }
 
-                // Converting the JSON text into an Order object.
-                Order? order;
+                // Deserialises the JSON request body into a CreateOrderRequest DTO instead of the Order queue message model.
+                // PropertyNameCaseInsensitive allows JSON property names to use different capitalisation from the C# model properties.
+                CreateOrderRequest? request;
                 try
                 {
-                    order = JsonSerializer.Deserialize<Order>(body,
+                    request = JsonSerializer.Deserialize<CreateOrderRequest>(body,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 }
                 catch (JsonException)
                 {
+                    // Returns 400 Bad Request when the JSON is not valid or a field has the wrong type, for example a price written as text.
                     return await WriteJson(req, HttpStatusCode.BadRequest,
-                        new { errors = new[] { "Request body is not valid JSON." } });
+                        new ValidationErrorResponse("Request body is not valid JSON."));
                 }
 
-                if (order == null)
+                // Returns 400 Bad Request when the JSON could be read but did not contain an order, for example when the body is just null.
+                if (request == null)
                 {
                     return await WriteJson(req, HttpStatusCode.BadRequest,
-                        new { errors = new[] { "Order could not be read." } });
+                        new ValidationErrorResponse("Order could not be read."));
                 }
 
-                // Validating every field and collecting all problems so the client can fix them in one go.
+                // Validates every field and collects all the problems in one list, so that the client can fix them in one go.
                 var errors = new List<string>();
 
-                if (string.IsNullOrWhiteSpace(order.CustomerName))
+                if (string.IsNullOrWhiteSpace(request.CustomerName))
                     errors.Add("CustomerName is required.");
 
-                if (order.SelectedItemSKUs == null || order.SelectedItemSKUs.Count == 0)
+                if (request.SelectedItemSKUs == null || request.SelectedItemSKUs.Count == 0)
                     errors.Add("SelectedItemSKUs must contain at least one item.");
-                else if (order.SelectedItemSKUs.Any(string.IsNullOrWhiteSpace))
+                else if (request.SelectedItemSKUs.Any(string.IsNullOrWhiteSpace))
                     errors.Add("SelectedItemSKUs cannot contain blank values.");
 
-                if (order.TotalPrice <= 0)
+                if (request.TotalPrice <= 0)
                     errors.Add("TotalPrice must be greater than 0.");
 
+                // Returns 400 Bad Request with every validation problem when at least one field is not valid.
                 if (errors.Count > 0)
                 {
                     _logger.LogWarning("Order rejected: {Errors}", string.Join(" | ", errors));
-                    return await WriteJson(req, HttpStatusCode.BadRequest, new { errors });
+                    return await WriteJson(req, HttpStatusCode.BadRequest, new ValidationErrorResponse(errors));
                 }
 
-                // Server-generated values:
-                // OrderId looks like ORD-2026-A1B2C3; the timestamp is the current UTC time.
-                if (string.IsNullOrWhiteSpace(order.OrderId))
-                {
-                    order.OrderId = $"ORD-{DateTime.UtcNow:yyyy}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
-                }
+                // Maps the validated request DTO into the Order that is placed on the queue.
+                // The mapper generates the order number and the UTC timestamp when the client did not send them.
+                Order order = OrderMapper.ToOrder(request);
 
-                if (order.OrderTimestamp == default)
-                {
-                    order.OrderTimestamp = DateTime.UtcNow;
-                }
-
-                order.CustomerName = order.CustomerName.Trim();
-
-                // Serialising the validated order into a JSON string (the queue message).
+                // Serialises the Order into a JSON string, because the message that is placed on the queue is plain text.
                 string messageJson = JsonSerializer.Serialize(order);
 
-                // Connecting to the queue.
+                // Reads the storage connection string from the environment, it points to Azurite when the app runs locally.
                 string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true";
+
+                // Base64 encoding must match the "messageEncoding": "base64" setting in host.json, otherwise the queue trigger cannot read the message.
                 var options = new QueueClientOptions { MessageEncoding = QueueMessageEncoding.Base64 };
 
-                // Failing fast if the queue is unreachable instead of waiting a long time.
+                // Fails fast when the queue is unreachable instead of making the client wait for a long time.
                 options.Retry.MaxRetries = 1;
                 options.Retry.Delay = TimeSpan.FromMilliseconds(500);
                 options.Retry.NetworkTimeout = TimeSpan.FromSeconds(5);
 
+                // Creates a client for accessing the order-processing-queue in Azure Queue Storage.
                 var queueClient = new QueueClient(connectionString, QueueName, options);
 
-                // Creating the queue the first time it is used, then places the order on it.
+                // Ensures that the queue exists before the order is placed on it.
                 await queueClient.CreateIfNotExistsAsync();
+
+                // Places the order on the queue, the ProcessOrderQueue trigger picks it up from there.
                 await queueClient.SendMessageAsync(messageJson);
 
                 _logger.LogInformation("Order {OrderId} placed on {Queue}.", order.OrderId, QueueName);
 
-                // 202 Accepted means (received and will be processed later).
-                return await WriteJson(req, HttpStatusCode.Accepted, new
-                {
-                    message = "Order accepted and queued for processing.",
-                    orderId = order.OrderId,
-                    orderDate = order.OrderTimestamp.ToString("yyyy-MM-dd")
-                });
+                // Returns 202 Accepted to indicate that the order was received and will be processed later.
+                // The response DTO includes the order date, which is needed to look the order up in the Orders table.
+                return await WriteJson(req, HttpStatusCode.Accepted, OrderMapper.ToQueuedResponse(order));
             }
             catch (RequestFailedException ex)
             {
-                // Azure Storage error message.
+                // Handles errors returned by Azure Storage and returns a 503 Service Unavailable so that the client knows to try again.
                 _logger.LogError(ex, "Azure Queue error while placing the order.");
                 return await WriteJson(req, HttpStatusCode.ServiceUnavailable,
-                    new { error = $"Queue unavailable: {ex.ErrorCode} - {ex.Message}" });
+                    new ErrorResponse($"Queue unavailable: {ex.ErrorCode} - {ex.Message}"));
             }
             catch (Exception ex) when (ex is AggregateException || ex is HttpRequestException ||
                                        ex is TimeoutException || ex is OperationCanceledException)
             {
-                // If queue could not be reached at all (for example Azurite is stopped).
+                // Handles the case where the queue cannot be reached at all, for example when Azurite is stopped.
                 _logger.LogError(ex, "Queue storage is not reachable.");
                 return await WriteJson(req, HttpStatusCode.ServiceUnavailable,
-                    new { error = "Queue storage is not reachable. Please try again shortly." });
+                    new ErrorResponse("Queue storage is not reachable. Please try again shortly."));
             }
             catch (Exception ex)
             {
-                // Returning a clean 500 instead of crashing for any other unexpected error .
+                // Handles unexpected errors and returns a 500 Internal Server Error so that the client receives an appropriate failure response.
                 _logger.LogError(ex, "Unexpected error while placing the order.");
                 return await WriteJson(req, HttpStatusCode.InternalServerError,
-                    new { error = $"Error: {ex.Message}" });
+                    new ErrorResponse($"Error: {ex.Message}"));
             }
         }
 
-        // Builds a response with the given status code and a JSON body.
+        // Creates a response with the given status code and writes the given DTO into it as JSON.
         private static async Task<HttpResponseData> WriteJson(HttpRequestData req, HttpStatusCode status, object payload)
         {
             var response = req.CreateResponse(status);
