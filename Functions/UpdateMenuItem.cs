@@ -1,5 +1,9 @@
-// Attribution: PUT and ETag concurrency pattern adapted from the lecturer's "Method for put and delete" example (IIE, 2026)
-// and the Azure Tables client library documentation (Microsoft Learn, 2026c).
+// Code attribution: directly adapted from lecturer-provided "Method for put
+// and delete" course example, using the same PUT +
+// ETag concurrency pattern, and Microsoft's official documentation:
+// Microsoft, "Azure Tables client library for .NET," Microsoft Learn,6 May 2025.
+// https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+// [Accessed: 28-Aug-2026].
 using Azure;
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
@@ -7,6 +11,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using System.Net;
 using System.Text.Json;
 using CoffeeNChillFunctions.Models;
+using CoffeeNChillFunctions.DTOs;
 
 namespace CoffeeNChillFunctions.Functions
 {
@@ -28,11 +33,21 @@ namespace CoffeeNChillFunctions.Functions
                 string body = await new StreamReader(req.Body).ReadToEndAsync();
 
                 // Deserialises the JSON request body into a MenuItem object while allowing different capitalisation of property names.
-                var updated = JsonSerializer.Deserialize<MenuItem>(body,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                // The JSON is now read into a MenuItemUpdateRequest DTO, so that only the values that were sent are changed and the other values of the menu item stay as they were.
+                MenuItemUpdateRequest? updateDto;
+                try
+                {
+                    updateDto = JsonSerializer.Deserialize<MenuItemUpdateRequest>(body,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                catch (JsonException)
+                {
+                    // Treats a body that is empty or is not valid JSON the same as a missing request, so that it returns 400 instead of a 500 Internal Server Error.
+                    updateDto = null;
+                }
 
                 // Validates that the request contains valid JSON that could be converted into a MenuItem object.
-                if (updated == null)
+                if (updateDto == null)
                 {
                     // Returns 400 Bad Request when the submitted JSON is invalid.
                     response.StatusCode = HttpStatusCode.BadRequest;
@@ -59,6 +74,19 @@ namespace CoffeeNChillFunctions.Functions
                     return response;
                 }
 
+                // Validates that the new price, when one was sent, has not been entered as a negative number.
+                if (updateDto.Price.HasValue && updateDto.Price.Value < 0)
+                {
+                    // Returns 400 Bad Request when the price is negative.
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    await response.WriteStringAsync("Price cannot be negative.");
+                    return response;
+                }
+
+                // Starts from the existing menu item and lets the mapper copy only the values that were sent onto it.
+                MenuItem updated = existing.Value;
+                MenuItemMapper.ApplyUpdate(updated, updateDto);
+
                 // Ensures that the updated entity uses the same partition key and row key as the existing menu item.
                 updated.PartitionKey = category;
                 updated.RowKey = id;
@@ -71,7 +99,9 @@ namespace CoffeeNChillFunctions.Functions
 
                 // Returns 200 OK to indicate that the menu item was successfully updated.
                 response.StatusCode = HttpStatusCode.OK;
-                await response.WriteStringAsync("Menu item updated successfully!");
+
+                // Returns the updated menu item as a MenuItemResponse DTO instead of a plain message, so that the client can see the saved values.
+                await response.WriteAsJsonAsync(MenuItemMapper.ToResponse(updated));
                 return response;
             }
             catch (RequestFailedException ex)

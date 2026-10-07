@@ -10,6 +10,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using System.Net;
 using System.Text.Json;
 using CoffeeNChillFunctions.Models;
+using CoffeeNChillFunctions.DTOs;
 
 namespace CoffeeNChillFunctions.Functions
 {
@@ -30,18 +31,42 @@ namespace CoffeeNChillFunctions.Functions
 
                 // Deserialises the JSON request body into a MenuItem object.
                 // PropertyNameCaseInsensitive allows JSON property names to use different capitalisation from the C# model properties.
-                var item = JsonSerializer.Deserialize<MenuItem>(body,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                // The JSON is now read into a MenuItemRequest DTO instead of the MenuItem table entity, so that the shape of the incoming request stays separate from the shape of the stored data.
+                MenuItemRequest? dto;
+                try
+                {
+                    dto = JsonSerializer.Deserialize<MenuItemRequest>(body,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                catch (JsonException)
+                {
+                    // Returns 400 Bad Request when the request body is empty or is not valid JSON, instead of letting the exception cause a 500 Internal Server Error.
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    await response.WriteStringAsync("Invalid JSON.");
+                    return response;
+                }
 
                 // Validates the required menu item fields before attempting to store the item in Table Storage.
-                if (item == null || string.IsNullOrWhiteSpace(item.PartitionKey) ||
-                    string.IsNullOrWhiteSpace(item.RowKey) || string.IsNullOrWhiteSpace(item.Name))
+                if (dto == null || string.IsNullOrWhiteSpace(dto.Category) ||
+                    string.IsNullOrWhiteSpace(dto.Sku) || string.IsNullOrWhiteSpace(dto.Name))
                 {
                     // Returns 400 Bad Request when required menu item information has not been provided.
                     response.StatusCode = HttpStatusCode.BadRequest;
                     await response.WriteStringAsync("Category, SKU (RowKey) and Name are required.");
                     return response;
                 }
+
+                // Validates that the price has not been entered as a negative number before the item is stored.
+                if (dto.Price < 0)
+                {
+                    // Returns 400 Bad Request when the price is negative.
+                    response.StatusCode = HttpStatusCode.BadRequest;
+                    await response.WriteStringAsync("Price cannot be negative.");
+                    return response;
+                }
+
+                // Maps the validated MenuItemRequest DTO into a MenuItem entity so that it can be stored in the MenuItems table.
+                MenuItem item = MenuItemMapper.ToEntity(dto);
 
                 // Creates a client for accessing the MenuItems table in Azure Table Storage.
                 string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true";
@@ -56,7 +81,9 @@ namespace CoffeeNChillFunctions.Functions
 
                 // Returns 201 Created to indicate that the menu item was successfully added.
                 response.StatusCode = HttpStatusCode.Created;
-                await response.WriteStringAsync("Menu item created successfully!");
+
+                // Returns the created menu item as a MenuItemResponse DTO instead of a plain message, so that the client can see the saved values without the ETag and Timestamp storage details.
+                await response.WriteAsJsonAsync(MenuItemMapper.ToResponse(item));
                 return response;
             }
             catch (RequestFailedException ex)

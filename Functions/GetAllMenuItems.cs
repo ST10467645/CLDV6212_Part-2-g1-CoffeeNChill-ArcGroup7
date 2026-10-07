@@ -1,10 +1,14 @@
-// Attribution: Table Storage query pattern adapted from the lecturer's course example (IIE, 2026)
-// and the Azure Tables client library documentation (Microsoft Learn, 2026c).
+// Code attribution: Table Storage query pattern adapted from lecturer-provided
+// course example and Microsoft's official documentation:
+// Microsoft, "Azure Tables client library for .NET," Microsoft Learn, 2025.
+// https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+// [Accessed: 27-Aug-2026].
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using System.Net;
 using CoffeeNChillFunctions.Models;
+using CoffeeNChillFunctions.DTOs;
 
 namespace CoffeeNChillFunctions.Functions
 {
@@ -27,11 +31,13 @@ namespace CoffeeNChillFunctions.Functions
             await table.CreateIfNotExistsAsync();
 
             // Stores the menu items retrieved from Table Storage.
-            var items = new List<MenuItem>();
+            // The list now holds MenuItemResponse DTOs instead of the MenuItem table entities.
+            var items = new List<MenuItemResponse>();
 
             // Non-simultaneously retrieves each MenuItem entity from the table and adds it to the results list.
             await foreach (var item in table.QueryAsync<MenuItem>())
-                items.Add(item);
+                // Converts each MenuItem entity into a MenuItemResponse DTO using the mapper, so that the ETag and Timestamp are not returned to the client.
+                items.Add(MenuItemMapper.ToResponse(item));
 
             // Serialises the menu items as JSON and adds them to the response body.
             await response.WriteAsJsonAsync(items);
