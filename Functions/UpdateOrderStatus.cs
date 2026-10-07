@@ -22,6 +22,7 @@
 using Azure;
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;
+using CoffeeNChillFunctions.DTOs;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
