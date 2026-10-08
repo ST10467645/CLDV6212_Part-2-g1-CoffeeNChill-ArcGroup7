@@ -76,7 +76,9 @@ namespace CoffeeNChillFunctions.Functions
                 if (string.IsNullOrWhiteSpace(body))
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteAsJsonAsync(new { error = "Request body is empty. Send {\"Status\":\"Preparing\"}." });
+
+                    //The error replies use the ErrorResponse DTO so they all have the same shape { "error": "..." }.
+                    await response.WriteAsJsonAsync(new ErrorResponse("Request body is empty. Send {\"Status\":\"Preparing\"}."));
                     return response;
                 }
 
@@ -89,7 +91,7 @@ namespace CoffeeNChillFunctions.Functions
                 catch (JsonException)
                 {
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteAsJsonAsync(new { error = "Request body is not valid JSON." });
+                    await response.WriteAsJsonAsync(new ErrorResponse("Request body is not valid JSON."));
                     return response;
                 }
 
@@ -101,7 +103,7 @@ namespace CoffeeNChillFunctions.Functions
                     _logger.LogWarning("Bad status '{NewStatus}' sent for order {OrderId}", newStatus, orderId);
 
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteAsJsonAsync(new { error = "Status must be one of: Received, Preparing, Ready, Collected." });
+                    await response.WriteAsJsonAsync(new ErrorResponse("Status must be one of: Received, Preparing, Ready, Collected."));
                     return response;
                 }
 
@@ -115,7 +117,7 @@ namespace CoffeeNChillFunctions.Functions
                     _logger.LogWarning("Order {OrderId} can't go from {OldStatus} to {NewStatus}", orderId, order.Value.Status, newStatus);
 
                     response.StatusCode = HttpStatusCode.BadRequest;
-                    await response.WriteAsJsonAsync(new { error = $"Not allowed. {order.Value.Status} can't go to {newStatus}." });
+                    await response.WriteAsJsonAsync(new ErrorResponse($"Not allowed. {order.Value.Status} can't go to {newStatus}."));
                     return response;
                 }
 
@@ -140,7 +142,7 @@ namespace CoffeeNChillFunctions.Functions
                 _logger.LogWarning("Order {OrderId} on {OrderDate} was not found", orderId, orderDate);
 
                 response.StatusCode = HttpStatusCode.NotFound;
-                await response.WriteAsJsonAsync(new { error = $"Order '{orderId}' for date '{orderDate}' not found." });
+                await response.WriteAsJsonAsync(new ErrorResponse($"Order '{orderId}' for date '{orderDate}' not found."));
                 return response;
             }
             catch (Exception ex)
@@ -149,7 +151,7 @@ namespace CoffeeNChillFunctions.Functions
                 _logger.LogError(ex, "Something went wrong when updating order {OrderId}", orderId);
 
                 response.StatusCode = HttpStatusCode.InternalServerError;
-                await response.WriteAsJsonAsync(new { error = $"Error: {ex.Message}" });
+                await response.WriteAsJsonAsync(new ErrorResponse($"Error: {ex.Message}"));
                 return response;
             }
         }

@@ -14,6 +14,7 @@ using System.Net;
 using System.Text.Json;
 using CoffeeNChillFunctions.Models;
 using CoffeeNChillFunctions.DTOs;
+using System.Text;
 
 namespace CoffeeNChillFunctions.Functions
 {
@@ -99,11 +100,16 @@ namespace CoffeeNChillFunctions.Functions
                 // Serialises the Order into a JSON string, because the message that is placed on the queue is plain text.
                 string messageJson = JsonSerializer.Serialize(order);
 
+                // Encodes the JSON string as Base64 text before it is placed on the queue.
+                string base64Message = Convert.ToBase64String(Encoding.UTF8.GetBytes(messageJson));
+
                 // Reads the storage connection string from the environment, it points to Azurite when the app runs locally.
                 string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true";
 
                 // Base64 encoding must match the "messageEncoding": "base64" setting in host.json, otherwise the queue trigger cannot read the message.
-                var options = new QueueClientOptions { MessageEncoding = QueueMessageEncoding.Base64 };
+                // The Base64 encoding is done in the code above, so the queue client sends the text exactly as it is (MessageEncoding None).
+                // This must match the "messageEncoding": "none" setting in host.json, otherwise the message would be decoded twice and the queue trigger could not read it.
+                var options = new QueueClientOptions { MessageEncoding = QueueMessageEncoding.None };
 
                 // Fails fast when the queue is unreachable instead of making the client wait for a long time.
                 options.Retry.MaxRetries = 1;
@@ -117,7 +123,7 @@ namespace CoffeeNChillFunctions.Functions
                 await queueClient.CreateIfNotExistsAsync();
 
                 // Places the order on the queue, the ProcessOrderQueue trigger picks it up from there.
-                await queueClient.SendMessageAsync(messageJson);
+                await queueClient.SendMessageAsync(base64Message);
 
                 _logger.LogInformation("Order {OrderId} placed on {Queue}.", order.OrderId, QueueName);
 
