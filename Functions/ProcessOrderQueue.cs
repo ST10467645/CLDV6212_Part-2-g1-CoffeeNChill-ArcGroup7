@@ -38,11 +38,21 @@
 //https://learn.microsoft.com/en-us/dotnet/api/system.int32.tryparse
 //[Accessed: 05-Oct-2026].
 
+//Convert.FromBase64String turns Base64 text back into the original bytes.
+//Reference: Microsoft, "Convert.FromBase64String Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/system.convert.frombase64string
+//[Accessed: 08-Oct-2026].
+//Encoding.GetString turns bytes into text.
+//Reference: Microsoft, "Encoding.GetString Method," Microsoft Learn, 2026.
+//https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.getstring
+//[Accessed: 08-Oct-2026].
+
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using System.Text;
 
 namespace CoffeeNChillFunctions.Functions
 {
@@ -101,8 +111,9 @@ namespace CoffeeNChillFunctions.Functions
                 throw new InvalidOperationException("TEST ERROR - forcing poison queue");
             }
 
-            //Turns the JSON text into an Order object, capital letters in the names don't matter
-            var order = JsonSerializer.Deserialize<Order>(queueMessage, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            //Decode the message to JSON first, then turn the JSON into an Order object
+            string json = GetJson(queueMessage);
+            var order = JsonSerializer.Deserialize<Order>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             //If the order is empty or missing the OrderId or the items we log and throw the error.
             //Throwing makes the message retry and then move to the poison queue.
@@ -142,6 +153,9 @@ namespace CoffeeNChillFunctions.Functions
             _logger.LogInformation("Status: {Status}", entity.Status);
             _logger.LogInformation("=================================");
 
+            //shows how many seconds the order is waiting for
+            _logger.LogInformation("Order {OrderId}: waiting {Seconds}s for processing...", entity.RowKey, StepDelaySeconds);
+
             //Now I pretend the barista is busy with the order.
             //I wait a few seconds, then change the status in the Orders table.
             //It goes in this order: Received > Preparing > Ready > Collected
@@ -173,6 +187,35 @@ namespace CoffeeNChillFunctions.Functions
             await _ordersTable.UpsertEntityAsync(entity);
 
             _logger.LogInformation("STATUS CHANGED: Order {OrderId} went from {OldStatus} to {NewStatus}", entity.RowKey, oldStatus, newStatus);
+        }
+
+        //Queue messages travel as Base64 text. Base64 is encoding, not encryption, so anyone can decode it.
+        //The host already decodes it once (host.json), so normally the text starts with "{" and I return it as it is.
+        //If it is still Base64 (for example a message added by hand) I decode it to JSON here.
+        private string GetJson(string queueMessage)
+        {
+            string text = queueMessage.Trim();
+
+            //Already plain JSON, nothing to decode
+            if (text.StartsWith("{"))
+            {
+                return text;
+            }
+
+            try
+            {
+                //Base64 text > bytes > UTF-8 text
+                byte[] jsonBytes = Convert.FromBase64String(text);
+                string json = Encoding.UTF8.GetString(jsonBytes);
+                _logger.LogInformation("Decoded JSON: {Json}", json);
+                return json;
+            }
+            catch (FormatException)
+            {
+                //Not Base64 either. The Deserialize step below will fail, so the message goes to the poison queue.
+                _logger.LogError("Message is neither JSON nor valid Base64.");
+                return text;
+            }
         }
     }
 }
