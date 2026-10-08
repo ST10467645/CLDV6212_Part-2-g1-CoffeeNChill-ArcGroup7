@@ -65,9 +65,9 @@ namespace CoffeeNChillFunctions.Functions
         private readonly TableClient _ordersTable;
 
         //How many seconds the order waits before the next status. It comes from STATUS_STEP_DELAY_SECONDS.
-        //int.TryParse gives false if the setting is missing or is not a number so then I use 5.
+        //int.TryParse gives false if the setting is missing or is not a number so then I use 30.
         //Docker Compose sets it to 10 so each status is easy to see.
-        private static readonly int StepDelaySeconds = int.TryParse(Environment.GetEnvironmentVariable("STATUS_STEP_DELAY_SECONDS"), out var seconds) && seconds >= 0 ? seconds : 5;
+        private static readonly int StepDelaySeconds = int.TryParse(Environment.GetEnvironmentVariable("STATUS_STEP_DELAY_SECONDS"), out var seconds) && seconds >= 0 ? seconds : 30;
 
         //The Functions host gives us the logger automatically (dependency injection) so I don't have to create it myself
         public ProcessOrderQueue(ILoggerFactory loggerFactory)
