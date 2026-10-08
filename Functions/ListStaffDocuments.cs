@@ -10,6 +10,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using CoffeeNChillFunctions.DTOs;
 
 namespace CoffeeNChillFunctions.Functions
 {
@@ -36,11 +37,13 @@ namespace CoffeeNChillFunctions.Functions
                 var containerClient = new BlobContainerClient(connectionString, "staff-docs");
                 await containerClient.CreateIfNotExistsAsync();
 
-                var files = new List<object>();
+                //The list holds StaffDocumentResponse DTOs instead of anonymous objects so every file in the reply has the same shape.
+                var files = new List<StaffDocumentResponse>();
+
                 //Loops through all the files in the container and gets their name, size and last modified date
                 await foreach (var blobItem in containerClient.GetBlobsAsync())
                 {
-                    files.Add(new
+                    files.Add(new StaffDocumentResponse
                     {
                         FileName = blobItem.Name,
                         SizeInBytes = blobItem.Properties.ContentLength,

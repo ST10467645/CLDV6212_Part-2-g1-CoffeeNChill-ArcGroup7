@@ -1,10 +1,15 @@
-// Attribution: filtered Table Storage query pattern adapted from the lecturer's course example (IIE, 2026)
-// and the Azure Table storage overview (Microsoft Learn, 2022).
+// Code attribution: filtered Table Storage query pattern adapted from
+// lecturer-provided course example (CLDV6212, IIE, 2026) and Microsoft's
+// official documentation:
+// Microsoft, "Understand the Azure Table storage data model," Microsoft Learn, 2025. 
+// https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-overview
+// [Accessed: 27-Aug-2026].
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using System.Net;
 using CoffeeNChillFunctions.Models;
+using CoffeeNChillFunctions.DTOs;
 
 namespace CoffeeNChillFunctions.Functions
 {
@@ -35,18 +40,20 @@ namespace CoffeeNChillFunctions.Functions
             await table.CreateIfNotExistsAsync();
 
             // Creates a list to store the menu items matching the requested category.
-            var items = new List<MenuItem>();
+            // The list now holds MenuItemResponse DTOs instead of the MenuItem table entities.
+            var items = new List<MenuItemResponse>();
 
             // Non-simultaneously queries Table Storage for entities whose PartitionKey matches the supplied category.
             await foreach (var item in table.QueryAsync<MenuItem>(x => x.PartitionKey == category))
-                items.Add(item);
+                // Converts each matching MenuItem entity into a MenuItemResponse DTO using the mapper, so that the ETag and Timestamp are not returned to the client.
+                items.Add(MenuItemMapper.ToResponse(item));
 
             // Creates a successful HTTP response after the query has completed.
             var response = req.CreateResponse(HttpStatusCode.OK);
 
             // Serialises the matching menu items as JSON.
             // If no items match the category, an empty array is returned rather than an error.
-            await response.WriteAsJsonAsync(items); 
+            await response.WriteAsJsonAsync(items);
             return response;
         }
     }

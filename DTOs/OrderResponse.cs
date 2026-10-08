@@ -2,7 +2,9 @@
 // and the comma-joined SKU text is turned back into a list.
 // Attribution:
 // entity-to-response mapping idea based on the Azure Tables client library documentation (Microsoft Learn, 2026c).
-namespace CoffeeNChillFunctions.Models
+using CoffeeNChillFunctions.Models;
+
+namespace CoffeeNChillFunctions.DTOs
 {
     public class OrderResponse
     {
