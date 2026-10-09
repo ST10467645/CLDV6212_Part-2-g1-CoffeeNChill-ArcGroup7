@@ -1,9 +1,9 @@
 {
   "info": {
-    "_postman_id": "070c94c4-7872-4fb8-9ca5-866f29d2a57b",
+    "_postman_id": "39e96a6d-02b8-4fb0-942f-912085a7fe76",
     "name": "CoffeeNChill Part 2 Collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "57297058"
+    "_exporter_id": "57297060"
   },
   "item": [
     {
@@ -235,9 +235,7 @@
                           "key": "file",
                           "type": "file",
                           "description": "chocolate chip cookie test data",
-                          "src": [
-                            "/C:/Users/emeris/OneDrive - ADvTECH Ltd/source VM Sem 4/repos/CoffeeNChillFunctions/docs/staff-docs_TestDocuments/ChocolateChipCookies_testdata.pdf"
-                          ]
+                          "src": "/C:/Users/emeris/OneDrive - ADvTECH Ltd/source VM Sem 4/repos/CoffeeNChillFunctions/docs/staff-docs_TestDocuments/ChocolateChipCookies_testdata.pdf"
                         }
                       ]
                     },
@@ -1152,15 +1150,6 @@
                   "request": {
                     "method": "GET",
                     "header": [],
-                    "body": {
-                      "mode": "raw",
-                      "raw": "",
-                      "options": {
-                        "raw": {
-                          "language": "json"
-                        }
-                      }
-                    },
                     "url": {
                       "raw": "{{baseUrl}}/orders/{{lastOrderDate}}/{{lastOrderId}}",
                       "host": [
@@ -1732,6 +1721,36 @@
                     }
                   },
                   "response": []
+                },
+                {
+                  "name": "MANUAL - Final status is Collected",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's official documentation:\r\n// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025.\r\n// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r\n// [Accessed: 09-Oct-2026].\r\n\r\n   // Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\n   pm.test(\"Order reached Collected\", () => pm.expect(pm.response.json().Status).to.eql(\"Collected\"));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/orders/{{statusOrderDate}}/{{statusOrderId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "orders",
+                        "{{statusOrderDate}}",
+                        "{{statusOrderId}}"
+                      ]
+                    }
+                  },
+                  "response": []
                 }
               ]
             },
@@ -1951,6 +1970,14 @@
     },
     {
       "key": "lastCategory",
+      "value": ""
+    },
+    {
+      "key": "statusOrderId",
+      "value": ""
+    },
+    {
+      "key": "statusOrderDate",
       "value": ""
     }
   ]
