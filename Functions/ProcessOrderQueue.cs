@@ -48,10 +48,10 @@
 //[Accessed: 08-Oct-2026].
 
 //The lecturer said we can use a timer for the waits but I was using Task.Delay because it already does the same job.
-//It pauses the function for 30 seconds without blocking the thread and the whole order stays inside one queue message, 
-//so the status changes still go Received > Preparing > Ready > Collected. A timer would only add extra code to do the same thing.
-//I also decode the Base64 message in my own GetJson method instead of copying the lecturer's code exactly because my host.json
-//and the producer can send either plain JSON or Base64 and allowing the function works with both.
+//It pauses the function for the delay without blocking the thread and the whole order stays inside one queue message, 
+//so the status changes still go Received > Preparing > Ready > Collected. A timer would only add extra code.
+//I decode the Base64 message in my own GetJson method. It decodes Base64 text and also accepts plain JSON,
+//so the function still works if a message is added by hand.
 
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;
@@ -72,7 +72,7 @@ namespace CoffeeNChillFunctions.Functions
 
         //How many seconds the order waits before the next status. It comes from STATUS_STEP_DELAY_SECONDS.
         //int.TryParse gives false if the setting is missing or is not a number so then I use 30.
-        //Docker Compose sets it to 10 so each status is easy to see.
+        //The default is 30 seconds as the lecturer suggested. docker-compose.yml can set a smaller number for quick tests.
         private static readonly int StepDelaySeconds = int.TryParse(Environment.GetEnvironmentVariable("STATUS_STEP_DELAY_SECONDS"), out var seconds) && seconds >= 0 ? seconds : 30;
 
         //The Functions host gives us the logger automatically (dependency injection) so I don't have to create it myself
@@ -95,13 +95,13 @@ namespace CoffeeNChillFunctions.Functions
         public async Task Run(
             //[QueueTrigger] makes this method run every time a new message lands in the queue.
             //Connection = "AzureWebJobsStorage" tells it which storage account to use.
-            //The following message gets decoded for us because of the setting in host.json.
+            //The message arrives as Base64 text because the producer encodes it. I decode it myself in GetJson below.
             [QueueTrigger("order-processing-queue", Connection = "AzureWebJobsStorage")] string queueMessage)
         {
             //These lines make the message easy to spot in the console when I test
             _logger.LogInformation("=================================");
             _logger.LogInformation("ORDER MESSAGE RECEIVED");
-            //Prints the message text so I can check the JSON came through properly
+            //Prints the raw message text. It is Base64 so I log the decoded JSON separately in GetJson.
             _logger.LogInformation("Message text: {Message}", queueMessage);
             _logger.LogInformation("=================================");
 
@@ -195,9 +195,9 @@ namespace CoffeeNChillFunctions.Functions
             _logger.LogInformation("STATUS CHANGED: Order {OrderId} went from {OldStatus} to {NewStatus}", entity.RowKey, oldStatus, newStatus);
         }
 
-        //Queue messages travel as Base64 text. Base64 is encoding, not encryption, so anyone can decode it.
-        //The host already decodes it once (host.json), so normally the text starts with "{" and I return it as it is.
-        //If it is still Base64 (for example a message added by hand) I decode it to JSON here.
+        //Queue messages travel as Base64 text. Base64 is encoding, not encryption so anyone can decode it.
+        //The producer encodes the JSON before it puts it on the queue so normally I have to decode it here.
+        //If the text already starts with "{" it is plain JSON (for example a message added by hand) and I return it as it is.
         private string GetJson(string queueMessage)
         {
             string text = queueMessage.Trim();
