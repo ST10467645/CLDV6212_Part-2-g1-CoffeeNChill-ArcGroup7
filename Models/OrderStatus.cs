@@ -1,4 +1,12 @@
-﻿// Add attributes
+﻿/*
+ * Code Attribution:
+ * The order status constants and lifecycle validation logic were
+ * implemented for the CLDV6212 CoffeeNChill project to control the
+ * order progression from Received to Preparing, Ready and Collected.
+ *
+ * CLDV6212 POE brief.
+ */
+
 using System.Collections.Generic;
 
 namespace CoffeeNChillFunctions.Models

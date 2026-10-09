@@ -1,6 +1,17 @@
-﻿// Attribution:
-// response DTO pattern based on the Azure Functions HTTP trigger documentation (Microsoft Learn, 2025b);
-// the reply shape follows the optional status endpoint example given by the lecturer (IIE, 2026).
+﻿/*
+ * Code Attribution:
+ * The HTTP response DTO pattern was based on Microsoft's official Azure
+ * Functions HTTP trigger documentation. The response structure for the
+ * optional order status endpoint was based on the lecturer-provided
+ * CLDV6212 course example.
+ *
+ * Microsoft Learn (2025b). Azure Functions HTTP trigger. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger?tabs=python-v2%2Cisolated-process%2Cnodejsv4%2Cfunctionsv2&pivots=programming-language-csharp
+ * [Accessed 04 September 2026].
+ *
+ * CLDV6212 lecturer-provided optional order status endpoint example.
+ */
+
 using System.Text.Json.Serialization;
 
 namespace CoffeeNChillFunctions.DTOs

@@ -1,6 +1,12 @@
-﻿// Attribution:
-// mapper pattern for converting between request, queue message and response objects, kept in one place
-// so the functions stay short (IIE, 2026).
+﻿/*
+ * Code Attribution:
+ * The mapper pattern for converting between request, queue message and
+ * response objects was implemented for the CLDV6212 CoffeeNChill project
+ * to keep the Azure Functions code short and easier to maintain.
+ *
+ * CLDV6212 POE brief.
+ */
+
 using CoffeeNChillFunctions.Models;
 
 namespace CoffeeNChillFunctions.DTOs

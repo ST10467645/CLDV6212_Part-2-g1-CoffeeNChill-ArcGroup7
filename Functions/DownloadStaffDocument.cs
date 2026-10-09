@@ -1,8 +1,13 @@
-// Shows a requested staff document (recipe sheet, cleaning manual, safety policy) back to the user from the "staff-docs" blob container.
-// Code attribution: blob streaming download pattern adapted from Microsoft's Azure Blob Storage documentation:
-// Microsoft, "Download a blob with .NET," Microsoft Learn, 2025.
-// https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-download
-// [Accessed: 28-Aug-2026].
+/*
+ * Code Attribution:
+ * The Azure Blob Storage streaming download pattern used in this function
+ * was adapted from Microsoft's official documentation.
+ *
+ * Microsoft Learn (2026d). Download a blob with .NET. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-download
+ * [Accessed 28-Aug-2026].
+ */
+
 using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -54,7 +59,7 @@ namespace CoffeeNChillFunctions.Functions
                 //Since UploadStaffDocuments sets the correct content type when the file is saved, 
                 //this should return the real file type like (application/pdf) rather than the default.
                 response.Headers.Add("Content-Type", downloadResult.Value.Details.ContentType ?? "application/octet-stream");
-                await downloadResult.Value.Content.CopyToAsync(response.Body); 
+                await downloadResult.Value.Content.CopyToAsync(response.Body);
 
                 _logger.LogInformation($"File '{fileName}' downloaded successfully.");
                 return response;

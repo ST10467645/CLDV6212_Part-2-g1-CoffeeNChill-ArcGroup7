@@ -1,6 +1,17 @@
-﻿// Attribution:
-// separating the request model from the table entity follows the lecturer's StudentQuery and
-// StudentQueryEntity examples (IIE, 2026); entity handling per the Azure Tables client library documentation (Microsoft Learn, 2026c).
+﻿/*
+ * Code Attribution:
+ * Separating the menu item request model from the table entity was based on
+ * the lecturer-provided StudentQuery and StudentQueryEntity course examples.
+ * Azure Table Storage entity handling follows Microsoft's official Azure
+ * Tables client library documentation.
+ *
+ * CLDV6212 lecturer-provided StudentQuery and StudentQueryEntity course examples.
+ *
+ * Microsoft Learn (2026c). Azure Tables client library for .NET - version 12.12.0. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ */
+
 using System.Text.Json.Serialization;
 
 namespace CoffeeNChillFunctions.DTOs

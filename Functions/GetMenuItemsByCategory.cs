@@ -1,9 +1,15 @@
-// Code attribution: filtered Table Storage query pattern adapted from
-// lecturer-provided course example (CLDV6212, IIE, 2026) and Microsoft's
-// official documentation:
-// Microsoft, "Understand the Azure Table storage data model," Microsoft Learn, 2025. 
-// https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-overview
-// [Accessed: 27-Aug-2026].
+/*
+ * Code Attribution:
+ * The filtered Azure Table Storage query pattern used to retrieve menu
+ * items by category was adapted from the lecturer-provided course example
+ * and Microsoft's official Azure Table Storage documentation.
+ *
+ * Lecturer CLDV6212 course example.
+ *
+ * Microsoft Learn (2022). What is Azure Table storage?. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/storage/tables/table-storage-overview
+ * [Accessed 04 September 2026].
+ */
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;

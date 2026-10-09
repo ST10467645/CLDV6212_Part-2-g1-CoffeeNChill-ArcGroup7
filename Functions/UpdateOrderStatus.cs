@@ -1,24 +1,29 @@
-﻿// This is my function for updating the status of an order. It runs when someone sends a PUT request only.
-// The body is JSON, for example {"Status":"Preparing"}. It finds the order, checks the new status is correct and the next step, then saves it.
-// Attribution: the structure (constructor with the table client, reading the status from the body, catching the 404 error, updating the row with its ETag) was adapted from the lecturer's UpdateStudentQueryStatus example (IIE, 2026).
+﻿/*
+ * Code Attribution:
+ * The order status update structure, including the constructor with the
+ * Azure Table Storage client, reading the requested status from the HTTP
+ * request body, handling 404 errors and updating the entity using its ETag,
+ * was adapted from the lecturer-provided UpdateStudentQueryStatus example.
+ *
+ * IIE (2026). CLDV6212 lecturer-provided UpdateStudentQueryStatus course example.
+ *
+ * Microsoft Learn (2025b). Azure Functions HTTP trigger. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger
+ * [Accessed 01 October 2026].
+ *
+ * Microsoft Learn (2026r). RequestFailedException Class. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/azure.requestfailedexception
+ * [Accessed 01 October 2026].
+ *
+ * Microsoft Learn (2026s). JsonSerializer.Deserialize Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializer.deserialize
+ * [Accessed 05 October 2026].
+ *
+ * Microsoft Learn (2026t). StreamReader.ReadToEndAsync Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader.readtoendasync
+ * [Accessed 05 October 2026].
+ */
 
-//The HTTP trigger makes the function run on a web request. Here it only accepts PUT.
-//Reference: Microsoft, "Azure Functions HTTP trigger," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger
-//[Accessed: 01-Oct-2026].
-//RequestFailedException is what the Azure SDK throws when storage says no like 404 not found.
-//Reference: Microsoft, "RequestFailedException Class," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/azure.requestfailedexception
-//[Accessed: 01-Oct-2026].
-
-//JsonSerializer.Deserialize turns the JSON text from the body into a C# object.
-//Reference: Microsoft, "JsonSerializer.Deserialize Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonserializer.deserialize
-//[Accessed: 05-Oct-2026].
-//StreamReader.ReadToEndAsync reads the whole request body as text.
-//Reference: Microsoft, "StreamReader.ReadToEndAsync Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/system.io.streamreader.readtoendasync
-//[Accessed: 05-Oct-2026].
 using Azure;
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;

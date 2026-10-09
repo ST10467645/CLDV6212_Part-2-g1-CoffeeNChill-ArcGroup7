@@ -1,6 +1,14 @@
-﻿// The JSON the customer sends and the queue carries.
-// Attribution: structure adapted from the StudentQuery model in the lecturer's Student Relations
-// example fields taken from the CLDV6212 POE brief
+﻿/*
+ * Code Attribution:
+ * The order model structure was adapted from the StudentQuery model in
+ * the lecturer-provided Student Relations course example. The order
+ * fields were based on the CLDV6212 POE brief.
+ *
+ * CLDV6212 lecturer-provided Student Relations course example.
+ *
+ * Lecturer CLDV6212 POE brief.
+ */
+
 namespace CoffeeNChillFunctions.Models
 {
     public class Order

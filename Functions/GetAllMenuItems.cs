@@ -1,8 +1,16 @@
-// Code attribution: Table Storage query pattern adapted from lecturer-provided
-// course example and Microsoft's official documentation:
-// Microsoft, "Azure Tables client library for .NET," Microsoft Learn, 2025.
-// https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
-// [Accessed: 27-Aug-2026].
+/*
+ * Code Attribution:
+ * The Azure Table Storage query pattern used to retrieve all menu items
+ * was adapted from the lecturer-provided course example and Microsoft's
+ * official Azure Tables client library documentation.
+ *
+ * Lecturer CLDV6212 course example.
+ *
+ * Microsoft Learn (2026c). Azure Tables client library for .NET - version 12.12.0. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+ * [Accessed: 27-Aug-2026].
+ */
+
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
