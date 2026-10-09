@@ -47,6 +47,12 @@
 //https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.getstring
 //[Accessed: 08-Oct-2026].
 
+//The lecturer said we can use a timer for the waits but I was using Task.Delay because it already does the same job.
+//It pauses the function for 30 seconds without blocking the thread and the whole order stays inside one queue message, 
+//so the status changes still go Received > Preparing > Ready > Collected. A timer would only add extra code to do the same thing.
+//I also decode the Base64 message in my own GetJson method instead of copying the lecturer's code exactly because my host.json
+//and the producer can send either plain JSON or Base64 and allowing the function works with both.
+
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;
 using Microsoft.Azure.Functions.Worker;
