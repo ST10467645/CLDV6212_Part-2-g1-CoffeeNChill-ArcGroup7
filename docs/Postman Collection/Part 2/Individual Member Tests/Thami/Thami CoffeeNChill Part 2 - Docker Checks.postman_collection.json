@@ -1,0 +1,296 @@
+{
+  "info": {
+    "_postman_id": "e93b8255-ae92-421e-b8ae-fa44948dd515",
+    "name": "Thami CoffeeNChill Part 2 - Docker Checks",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57297062"
+  },
+  "item": [
+    {
+      "name": "Part 2",
+      "item": [
+        {
+          "name": "Thami - Docker Checks",
+          "item": [
+            {
+              "name": "Seed Data",
+              "item": [
+                {
+                  "name": "Seed - Hot Drinks COF-007",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Seed item created (200 or 201)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r\n});"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"partitionKey\":\"Hot Drinks\",\"rowKey\":\"COF-007\",\"name\":\"Iced Coffee\",\"description\":\"Chilled espresso over ice with a splash of milk\",\"price\":34.00,\"isAvailable\":true}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/menu",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "menu"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Seed - Hot Drinks COF-003",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Seed item created (200 or 201)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r\n});"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"partitionKey\":\"Hot Drinks\",\"rowKey\":\"COF-003\",\"name\":\"Espresso\",\"description\":\"Single shot of strong espresso\",\"price\":25.00,\"isAvailable\":true}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/menu",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "menu"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ],
+              "description": "Run once after a fresh docker compose up"
+            },
+            {
+              "name": "Poison Mode Only",
+              "item": [
+                {
+                  "name": "Poison - Place Order",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Order accepted (202)\", function () {\r\n    pm.response.to.have.status(202);\r\n});"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"OrderId\":\"ORD-2026-POISON1\",\"CustomerName\":\"Poison Test\",\"SelectedItemSKUs\":[\"COF-001\"],\"TotalPrice\":10,\"OrderTimestamp\":\"2026-10-12T10:15:00Z\"}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/orders/queue",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "orders",
+                        "queue"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Poison - Order Never Saved",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Order was never saved because the message went to the poison queue (404)\", function () {\r\n    pm.response.to.have.status(404);\r\n});"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/orders/2026-10-12/ORD-2026-POISON1",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "orders",
+                        "2026-10-12",
+                        "ORD-2026-POISON1"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ],
+              "description": "Run only when ENABLE_POISON_TEST is true."
+            },
+            {
+              "name": "Health Check - Menu",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"API is reachable (200)\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Response time is under 2000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/menu",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "menu"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Health Check - Orders",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"API is reachable (200)\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Response time is under 2000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Health Check - Place Order",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Order accepted (202)\", function () {\r\n    pm.response.to.have.status(202);\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"CustomerName\":\"Health Check\",\"SelectedItemSKUs\":[\"COF-001\"],\"TotalPrice\":20}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders/queue",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "queue"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Health Check - Documents List",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"API is reachable (200)\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Response time is under 2000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/documents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "documents"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
