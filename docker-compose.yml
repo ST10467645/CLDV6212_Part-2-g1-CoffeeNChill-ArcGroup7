@@ -1,6 +1,6 @@
 # docker-compose.yml (repo ROOT)
 # Starts Azurite and the Functions app together. Images are pulled from Docker Hub (no local build).
-# Attribution: adapted from the lecturer's Docker Compose notes
+# Attribution: adapted from the lecturer's Docker Compose notes (IIE, 2026);
 # service structure, networks and volumes syntax from Docker (2026e; 2026f; 2026g).
 services:
   azurite:
@@ -26,8 +26,7 @@ services:
       FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
       # "azurite" is the service name, not localhost. Inside a container localhost means the container itself.
       AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
-      STATUS_STEP_DELAY_SECONDS: "10"
-      AUTO_ADVANCE_STATUS: "true"
+      STATUS_STEP_DELAY_SECONDS: "30"
       ENABLE_POISON_TEST: "false"
     depends_on:
       - azurite
