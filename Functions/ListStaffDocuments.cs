@@ -1,9 +1,17 @@
-// Lists all stored operational files in the "staff-docs" blob container, returning file name, size, and last modified date for each.
-// Code attribution: blob listing pattern adapted from lecturer-provided blob storage example and Microsoft's official
-// Azure Blob Storage documentation:
-// Microsoft, "Introduction to Azure Blob Storage," Microsoft Learn, 2025.
-// https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction
-// [Accessed: 28-Aug-2026].
+/*
+ * Code Attribution:
+ * The Azure Blob Storage listing pattern used to retrieve operational
+ * staff documents, including file names, sizes and last modified dates,
+ * was adapted from the lecturer-provided course example and Microsoft's
+ * official Azure Blob Storage documentation.
+ *
+ * Lecturer CLDV6212 course example.
+ *
+ * Microsoft Learn (2026e). Introduction to Azure Blob Storage. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction
+ * [Accessed 04 September 2026].
+ */
+
 using Azure;
 using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Worker;

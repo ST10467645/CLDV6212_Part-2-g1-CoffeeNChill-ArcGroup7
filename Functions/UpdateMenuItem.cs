@@ -1,9 +1,17 @@
-// Code attribution: directly adapted from lecturer-provided "Method for put
-// and delete" course example, using the same PUT +
-// ETag concurrency pattern, and Microsoft's official documentation:
-// Microsoft, "Azure Tables client library for .NET," Microsoft Learn,6 May 2025.
-// https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
-// [Accessed: 28-Aug-2026].
+/*
+ * Code Attribution:
+ * The HTTP PUT update pattern and ETag concurrency handling used in this
+ * function were adapted from the lecturer-provided "Method for put and
+ * delete" course example and Microsoft's official Azure Tables client
+ * library documentation.
+ *
+ * IIE (2026). CLDV6212 lecturer-provided "Method for put and delete" course example.
+ *
+ * Microsoft Learn (2026c). Azure Tables client library for .NET - version 12.12.0. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ */
+
 using Azure;
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;

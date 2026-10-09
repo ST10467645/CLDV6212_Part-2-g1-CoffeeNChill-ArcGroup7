@@ -1,6 +1,6 @@
 # docker-compose.yml (repo ROOT)
 # Starts Azurite and the Functions app together. Images are pulled from Docker Hub (no local build).
-# Attribution: adapted from the lecturer's Docker Compose notes (IIE, 2026);
+# Attribution: adapted from the lecturer's Docker Compose notes
 # service structure, networks and volumes syntax from Docker (2026e; 2026f; 2026g).
 services:
   azurite:

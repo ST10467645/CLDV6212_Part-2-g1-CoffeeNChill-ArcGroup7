@@ -1,8 +1,18 @@
-﻿// Code attribution: HTTP trigger + Table Storage insert pattern adapted from
-// lecturer provided course example and Microsoft Learn:
-// Microsoft, "HTTP trigger for Azure Functions," Microsoft Learn, 2025.
-// https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger
-// [Accessed: 26-Aug-2026].
+﻿/*
+ * Code Attribution:
+ * The HTTP trigger and Azure Table Storage insert patterns used in this
+ * function were adapted from the lecturer-provided course example and
+ * Microsoft's official documentation.
+ *
+ * Microsoft Learn (2025b). Azure Functions HTTP trigger. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger?tabs=python-v2%2Cisolated-process%2Cnodejsv4%2Cfunctionsv2&pivots=programming-language-csharp
+ * [Accessed 26-Aug-2026].
+ *
+ * Microsoft Learn (2026c). Azure Tables client library for .NET - version 12.12.0. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ */
+
 using Azure;
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;

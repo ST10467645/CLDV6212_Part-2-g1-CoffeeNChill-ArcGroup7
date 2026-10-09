@@ -1,5 +1,14 @@
-﻿// Attribution:
-// entity handling per the Azure Tables client library documentation (Microsoft Learn, 2026c).
+﻿/*
+ * Code Attribution:
+ * The Azure Table Storage entity handling pattern used to construct
+ * the order response was based on Microsoft's official Azure Tables
+ * client library documentation.
+ *
+ * Microsoft Learn (2026c). Azure Tables client library for .NET - version 12.12.0. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ */
+
 using CoffeeNChillFunctions.Models;
 
 namespace CoffeeNChillFunctions.DTOs

@@ -1,20 +1,34 @@
-﻿// Uploads a staff document (PDF, PNG or JPEG) from a multipart/form-data request into the "staff-docs" blob container.
-// Code attribution: multipart-form parsing pattern adapted from Microsoft's MultipartReader documentation:
-// Microsoft, "MultipartReader Class," Microsoft Learn, 2025.
-// https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.webutilities.multipartreader
-// [Accessed: 26-Aug-2026].
-// Blob upload pattern adapted from lecturer provided blob storage example and Microsoft Azure Blob Storage documentation:
-// Microsoft, "Introduction to Azure Blob Storage," Microsoft Learn, 2025.
-// https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction
-// [Accessed: 26-Aug-2026].
-// I was having problems with uploading in postman so the following helped me:
-// Content-Type resolution on upload adapted from Microsoft's Azure Blob Storage documentation:
-// Microsoft, "BlobHttpHeaders Class," Microsoft Learn, 2025.
-// https://learn.microsoft.com/en-us/dotnet/api/azure.storage.blobs.models.blobhttpheaders?view=azure-dotnet
-// [Accessed: 04-Sep-2026].
-// Microsoft, "BlobUploadOptions.HttpHeaders Property," Microsoft Learn, 2025.
-// https://learn.microsoft.com/en-us/dotnet/api/azure.storage.blobs.models.blobuploadoptions.httpheaders?view=azure-dotnet
-// [Accessed: 04-Sep-2026].
+﻿/*
+ * Code Attribution:
+ * The multipart/form-data parsing pattern used to receive uploaded files
+ * was adapted from Microsoft's official MultipartReader documentation.
+ *
+ * Microsoft Learn (2026f). MultipartReader Class. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.webutilities.multipartreader?view=aspnetcore-10.0
+ * [Accessed 04 September 2026].
+ *
+ * The Azure Blob Storage upload pattern was adapted from the lecturer-provided
+ * Blob Storage course example and Microsoft's official Azure Blob Storage
+ * documentation.
+ *
+ * IIE (2026). CLDV6212 lecturer-provided Blob Storage course example.
+ *
+ * Microsoft Learn (2026e). Introduction to Azure Blob Storage. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction
+ * [Accessed 04 September 2026].
+ *
+ * The blob content-type configuration used to support file uploads from
+ * Postman was implemented with reference to Microsoft's official documentation.
+ *
+ * Microsoft Learn (2026u). BlobHttpHeaders Class. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/azure.storage.blobs.models.blobhttpheaders?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ *
+ * Microsoft Learn (2026v). BlobUploadOptions.HttpHeaders Property. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/azure.storage.blobs.models.blobuploadoptions.httpheaders?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ */
+
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.WebUtilities;

@@ -1,7 +1,16 @@
-﻿// DTO (data transfer object) returned to clients so table internals (ETag, Timestamp) stay hidden
-// and the comma-joined SKU text is turned back into a list.
-// Attribution:
-// entity-to-response mapping idea based on the Azure Tables client library documentation (Microsoft Learn, 2026c).
+﻿/*
+ * DTO (data transfer object) returned to clients so table internals (ETag,
+ * Timestamp) stay hidden and the comma-joined SKU text is turned back into a list.
+ *
+ * Code Attribution:
+ * The entity-to-response mapping approach was based on Microsoft's official
+ * Azure Tables client library documentation.
+ *
+ * Microsoft Learn (2026c). Azure Tables client library for .NET - version 12.12.0. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ */
+
 using CoffeeNChillFunctions.Models;
 
 namespace CoffeeNChillFunctions.DTOs

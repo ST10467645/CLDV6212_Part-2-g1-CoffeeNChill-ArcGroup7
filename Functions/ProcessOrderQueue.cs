@@ -1,51 +1,68 @@
-﻿// Here I made a queue triggered function. It runs by itself whenever a new message arrives on the order-processing-queue.
-// It reads the order, saves it to the Orders table as Received, then moves it through Preparing, Ready and Collected.
-// If something goes wrong it throws an error so the message is retried and then moved to the poison queue.
-// Attribution: the [Function] and [QueueTrigger(..., Connection = "AzureWebJobsStorage")] pattern was adapted from the lecturer's ProcessStudentQuery example and Microsoft Learn (2026).
-//https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-csharp
-//[Accessed: 29-Sep-2026].
-// The ILogger injection follows the same pattern I used in the Part 1 Blob functions.
+﻿/*
+ * Code Attribution:
+ * The Azure Queue Storage trigger pattern was adapted from the lecturer-provided
+ * ProcessStudentQuery example and Microsoft's official Azure Functions documentation.
+ * The ILogger injection pattern follows my Part 1 Blob functions.
+ *
+ * CLDV6212 lecturer-provided ProcessStudentQuery course example.
+ *
+ * Microsoft Learn (2026g). Azure Queue storage trigger for Azure Functions. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger
+ * [Accessed 29 September 2026].
+ *
+ * The conditional operator, String.Join, Task.Delay, UpsertEntityAsync,
+ * Environment.GetEnvironmentVariable, Int32.TryParse, Convert.FromBase64String
+ * and Encoding.GetString methods were implemented with reference to Microsoft's
+ * official .NET documentation.
+ *
+ * Microsoft Learn (2026h). Conditional operator (?:). [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator
+ * [Accessed 30 September 2026].
+ *
+ * Microsoft Learn (2026i). String.Join Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/system.string.join
+ * [Accessed 30 September 2026].
+ *
+ * Microsoft Learn (2026j). Task.Delay Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.delay
+ * [Accessed 01 October 2026].
+ *
+ * Microsoft Learn (2026k). TableClient.UpsertEntityAsync Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/azure.data.tables.tableclient.upsertentityasync
+ * [Accessed 01 October 2026].
+ *
+ * Microsoft Learn (2026l). Azure Queue storage trigger for Azure Functions - Poison messages. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger
+ * [Accessed 01 October 2026].
+ *
+ * Microsoft Learn (2026m). Environment.GetEnvironmentVariable Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/system.environment.getenvironmentvariable
+ * [Accessed 01 October 2026].
+ *
+ * Microsoft Learn (2026n). Int32.TryParse Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/system.int32.tryparse
+ * [Accessed 05 October 2026].
+ *
+ * Microsoft Learn (2026o). Convert.FromBase64String Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/system.convert.frombase64string
+ * [Accessed 08 October 2026].
+ *
+ * Microsoft Learn (2026p). Encoding.GetString Method. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.getstring
+ * [Accessed 08 October 2026].
+ */
 
-//The ?: operator picks one of two values depending on the condition(what the user entered, or the current time).
-//Reference: Microsoft, "?: operator - the ternary conditional operator," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/operators/conditional-operator
-//[Accessed: 30-Sep-2026].
-//A table column can't hold a list, so the SKUs are joined into one text value, for example "COF-001,PAS-104".
-//String.Join puts a separator between each item in the list.
-//Reference: Microsoft, "String.Join Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/system.string.join
-//[Accessed: 30-Sep-2026].
+// NOTE:
+// The lecturer said we can use a timer for the waits, but I used Task.Delay
+// because it already does the same job. It pauses the function for 30 seconds
+// without blocking the thread, and the whole order stays inside one queue message,
+// so the status changes still go Received > Preparing > Ready > Collected.
+// A timer would add extra code to do the same thing.
+//
+// I also decode the Base64 message in my own GetJson method instead of copying
+// the lecturer's code exactly because my host.json and the producer can send
+// either plain JSON or Base64, allowing the function to work with both.
 
-//Task.Delay makes the function wait without freezing  it. I use it to pretend the barista needs time to make the order.
-//Reference: Microsoft, "Task.Delay Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.delay
-//[Accessed: 01-Oct-2026].
-//UpsertEntityAsync saves the same row again with the new status.
-//Reference: Microsoft, "TableClient.UpsertEntityAsync Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/azure.data.tables.tableclient.upsertentityasync
-//[Accessed: 01-Oct-2026].
-//Azure retries a queue message that throws an error. After 5 tries it moves the message to a poison queue called <queue name>-poison.
-//Reference: Microsoft, "Azure Queue storage trigger for Azure Functions - Poison messages," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger
-//[Accessed: 01-Oct-2026].
-//Environment.GetEnvironmentVariable reads a setting by its name.
-//Reference: Microsoft, "Environment.GetEnvironmentVariable Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/system.environment.getenvironmentvariable
-//[Accessed: 01-Oct-2026].
-
-//int.TryParse turns the setting text into a number and gives false instead of crashing if it is not a number.
-//Reference: Microsoft, "Int32.TryParse Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/system.int32.tryparse
-//[Accessed: 05-Oct-2026].
-
-//Convert.FromBase64String turns Base64 text back into the original bytes.
-//Reference: Microsoft, "Convert.FromBase64String Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/system.convert.frombase64string
-//[Accessed: 08-Oct-2026].
-//Encoding.GetString turns bytes into text.
-//Reference: Microsoft, "Encoding.GetString Method," Microsoft Learn, 2026.
-//https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.getstring
-//[Accessed: 08-Oct-2026].
 
 using Azure.Data.Tables;
 using CoffeeNChillFunctions.Models;
@@ -66,7 +83,7 @@ namespace CoffeeNChillFunctions.Functions
 
         //How many seconds the order waits before the next status. It comes from STATUS_STEP_DELAY_SECONDS.
         //int.TryParse gives false if the setting is missing or is not a number so then I use 30.
-        //Docker Compose sets it to 10 so each status is easy to see.
+        // Docker Compose sets it to 30 seconds (default is also 30).
         private static readonly int StepDelaySeconds = int.TryParse(Environment.GetEnvironmentVariable("STATUS_STEP_DELAY_SECONDS"), out var seconds) && seconds >= 0 ? seconds : 30;
 
         //The Functions host gives us the logger automatically (dependency injection) so I don't have to create it myself
@@ -189,9 +206,9 @@ namespace CoffeeNChillFunctions.Functions
             _logger.LogInformation("STATUS CHANGED: Order {OrderId} went from {OldStatus} to {NewStatus}", entity.RowKey, oldStatus, newStatus);
         }
 
-        //Queue messages travel as Base64 text. Base64 is encoding, not encryption, so anyone can decode it.
-        //The host already decodes it once (host.json), so normally the text starts with "{" and I return it as it is.
-        //If it is still Base64 (for example a message added by hand) I decode it to JSON here.
+        //Queue messages travel as Base64 text. 
+        // host.json has "messageEncoding": "none", so we receive the Base64 text exactly as SubmitOrder sent it
+        // and decode it ourselves in GetJson below.
         private string GetJson(string queueMessage)
         {
             string text = queueMessage.Trim();

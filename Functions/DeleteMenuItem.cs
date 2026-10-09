@@ -1,5 +1,16 @@
-// Attribution: HTTP DELETE and Table Storage delete pattern adapted from the lecturer's course example (IIE, 2026)
-// and the Azure Tables client library documentation (Microsoft Learn, 2026c).
+/*
+ * Code Attribution:
+ * The HTTP DELETE and Azure Table Storage deletion patterns used in this
+ * function were adapted from the lecturer-provided course example and
+ * Microsoft's official Azure Tables client library documentation.
+ *
+ * Lecturer CLDV6212 course example.
+ *
+ * Microsoft Learn (2026c). Azure Tables client library for .NET - version 12.12.0. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ */
+
 using Azure;
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;

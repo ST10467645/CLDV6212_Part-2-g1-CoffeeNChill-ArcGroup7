@@ -1,5 +1,11 @@
-﻿// Attribution:
-// separating the response model from the table entity follows the lecturer's model examples (IIE, 2026).
+﻿/*
+ * Code Attribution:
+ * Separating the menu item response model from the table entity was based
+ * on the model structure demonstrated in the lecturer-provided course examples.
+ *
+ * CLDV6212 lecturer-provided model examples.
+ */
+
 namespace CoffeeNChillFunctions.DTOs
 {
     // Defines the DTO that is returned to the client for a menu item.

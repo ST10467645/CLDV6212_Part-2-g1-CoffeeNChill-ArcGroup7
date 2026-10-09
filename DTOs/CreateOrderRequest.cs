@@ -1,6 +1,12 @@
-﻿/* Attribution:
- * separating the request model from the queue message model follows the lecturer's StudentQuery
- * examples; the fields are taken from the CLDV6212 POE brief.
+﻿/*
+ * Code Attribution:
+ * Separating the request model from the queue message model was based on
+ * the lecturer-provided StudentQuery examples. The request fields were
+ * taken from the CLDV6212 POE brief.
+ *
+ * CLDV6212 lecturer-provided StudentQuery course example.
+ *
+ * Lecturer CLDV6212 POE brief.
  */
 
 namespace CoffeeNChillFunctions.DTOs

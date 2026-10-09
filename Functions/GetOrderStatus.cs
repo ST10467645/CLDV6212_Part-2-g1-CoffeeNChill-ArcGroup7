@@ -1,6 +1,17 @@
-﻿// Lets someone check the status of an order with only its order id, for example GET /api/orders/ORD-2026-8801
-// Attribution: Table Storage query pattern adapted from the lecturer's examples (IIE, 2026)
-// and the Azure Tables client library documentation (Microsoft Learn, 2026c).
+﻿/*
+ * Code Attribution:
+ * The Azure Table Storage query pattern used to retrieve an order by its
+ * order ID and check its status was adapted from the lecturer-provided
+ * course example and Microsoft's official Azure Tables client library
+ * documentation.
+ *
+ * Lecturer CLDV6212 course example.
+ *
+ * Microsoft Learn (2026c). Azure Tables client library for .NET - version 12.12.0. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/data.tables-readme?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ */
+
 using Azure;
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;

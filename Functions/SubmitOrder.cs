@@ -1,10 +1,25 @@
-﻿// Queue PRODUCER: validates an order, turns it into JSON and places it on order-processing-queue.
-// The customer gets an instant 202 Accepted; the order is processed later by ProcessOrderQueue.
-//
-// Attribution: HTTP trigger and queue producer pattern adapted from the lecturer's examples (IIE, 2026)
-// and the HTTP trigger documentation (Microsoft Learn, 2025b); QueueClient and Base64 message encoding
-// per the Queues client library documentation (Microsoft Learn, 2026h); trigger-side queue rules
-// per the Queue storage trigger documentation (Microsoft Learn, 2026g).
+﻿/*
+ * Code Attribution:
+ * The HTTP-triggered queue producer pattern used to validate an order,
+ * serialise it as JSON and enqueue it for asynchronous processing was
+ * adapted from the lecturer-provided course example and Microsoft's
+ * official Azure Functions and Azure Queue Storage documentation.
+ *
+ * Lecturer CLDV6212 course example.
+ *
+ * Microsoft Learn (2025b). Azure Functions HTTP trigger. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-http-webhook-trigger?tabs=python-v2%2Cisolated-process%2Cnodejsv4%2Cfunctionsv2&pivots=programming-language-csharp
+ * [Accessed 04 September 2026].
+ *
+ * Microsoft Learn (2026q). Azure Queue Storage client library for .NET. [Online]
+ * Available at: https://learn.microsoft.com/en-us/dotnet/api/overview/azure/storage.queues-readme?view=azure-dotnet
+ * [Accessed 04 September 2026].
+ *
+ * Microsoft Learn (2026g). Azure Queue storage trigger for Azure Functions. [Online]
+ * Available at: https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-queue-trigger
+ * [Accessed 29 September 2026].
+ */
+
 using Azure;
 using Azure.Storage.Queues;
 using Microsoft.Azure.Functions.Worker;
@@ -106,9 +121,10 @@ namespace CoffeeNChillFunctions.Functions
                 // Reads the storage connection string from the environment, it points to Azurite when the app runs locally.
                 string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true";
 
-                // Base64 encoding must match the "messageEncoding": "base64" setting in host.json, otherwise the queue trigger cannot read the message.
-                // The Base64 encoding is done in the code above, so the queue client sends the text exactly as it is (MessageEncoding None).
-                // This must match the "messageEncoding": "none" setting in host.json, otherwise the message would be decoded twice and the queue trigger could not read it.
+                // Base64 encoding is done here in the code (encoding, not encryption). host.json has "messageEncoding": "none",
+                // so the queue stores exactly the Base64 text we send and ProcessOrderQueue decodes it again.
+                // Attribution:
+                // Convert.ToBase64String pattern adapted from Microsoft Learn (2026n).
                 var options = new QueueClientOptions { MessageEncoding = QueueMessageEncoding.None };
 
                 // Fails fast when the queue is unreachable instead of making the client wait for a long time.
