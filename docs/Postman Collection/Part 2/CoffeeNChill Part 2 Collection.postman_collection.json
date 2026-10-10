@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "39e96a6d-02b8-4fb0-942f-912085a7fe76",
+    "_postman_id": "202bff2e-af26-4756-8c3c-3e4651b8aa49",
     "name": "CoffeeNChill Part 2 Collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "57297060"
@@ -1886,7 +1886,7 @@
                     "header": [],
                     "body": {
                       "mode": "raw",
-                      "raw": "",
+                      "raw": "not json",
                       "options": {
                         "raw": {
                           "language": "text"
