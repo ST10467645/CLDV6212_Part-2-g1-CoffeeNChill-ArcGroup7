@@ -1,9 +1,9 @@
 {
   "info": {
-    "_postman_id": "202bff2e-af26-4756-8c3c-3e4651b8aa49",
+    "_postman_id": "070c94c4-7872-4fb8-9ca5-866f29d2a57b",
     "name": "CoffeeNChill Part 2 Collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "57297060"
+    "_exporter_id": "57297058"
   },
   "item": [
     {
@@ -235,7 +235,9 @@
                           "key": "file",
                           "type": "file",
                           "description": "chocolate chip cookie test data",
-                          "src": "/C:/Users/emeris/OneDrive - ADvTECH Ltd/source VM Sem 4/repos/CoffeeNChillFunctions/docs/staff-docs_TestDocuments/ChocolateChipCookies_testdata.pdf"
+                          "src": [
+                            "/C:/Users/emeris/OneDrive - ADvTECH Ltd/source VM Sem 4/repos/CoffeeNChillFunctions/docs/staff-docs_TestDocuments/ChocolateChipCookies_testdata.pdf"
+                          ]
                         }
                       ]
                     },
@@ -391,18 +393,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "   pm.test(\"Status code is successful\", function () {\r",
-                              "       pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "   });"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -432,18 +426,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "   pm.test(\"Status code is successful\", function () {\r",
-                              "       pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "   });"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -475,18 +461,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "   pm.test(\"Status code is successful\", function () {\r",
-                              "       pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "   });"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -498,9 +476,8 @@
                           "formdata": [
                             {
                               "key": "file",
-                              "description": "chocolate chip cookie recipe text document",
                               "type": "file",
-                              "uuid": "669e2473-cc23-47e2-968b-261b3d4838fd",
+                              "description": "chocolate chip cookie recipe text document",
                               "src": "/C:/Users/emeris/OneDrive - ADvTECH Ltd/Desktop/Documents/Kandyce Jade Smit's files - Part 1 (Shared)/Member folders/Kristen/Test Documents/How to Make Chocolate Chip Cookies.txt"
                             }
                           ]
@@ -524,18 +501,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "   pm.test(\"Status code is successful\", function () {\r",
-                              "       pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "   });"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -579,18 +548,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "pm.test(\"Status code is successful\", function () {\r",
-                              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "});"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -624,18 +585,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "pm.test(\"Status code is successful\", function () {\r",
-                              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "});"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -674,18 +627,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "pm.test(\"Status code is successful\", function () {\r",
-                              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "});"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -715,18 +660,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "pm.test(\"Status code is successful\", function () {\r",
-                              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "});"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -753,18 +690,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "pm.test(\"Status code is successful\", function () {\r",
-                              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "});"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -796,18 +725,10 @@
                         {
                           "listen": "test",
                           "script": {
-                            "exec": [
-                              "// Test script attribution: pattern adapted from Postman's official documentation:\r",
-                              "// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025. \r",
-                              "// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r",
-                              "// [Accessed: 01-Sep-2026].\r",
-                              "pm.test(\"Status code is successful\", function () {\r",
-                              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
-                              "});"
-                            ],
                             "type": "text/javascript",
-                            "packages": {},
-                            "requests": {}
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
                           }
                         }
                       ],
@@ -844,6 +765,17 @@
                   "item": [
                     {
                       "name": "Delete Menu Item - Invalid: menu item does not exist",
+                      "event": [
+                        {
+                          "listen": "test",
+                          "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Expected error status returned (400)\", function () {\r\n    pm.response.to.have.status(400);\r\n});"
+                            ]
+                          }
+                        }
+                      ],
                       "request": {
                         "method": "DELETE",
                         "header": [],
@@ -1150,6 +1082,15 @@
                   "request": {
                     "method": "GET",
                     "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
                     "url": {
                       "raw": "{{baseUrl}}/orders/{{lastOrderDate}}/{{lastOrderId}}",
                       "host": [
@@ -1721,36 +1662,6 @@
                     }
                   },
                   "response": []
-                },
-                {
-                  "name": "MANUAL - Final status is Collected",
-                  "event": [
-                    {
-                      "listen": "test",
-                      "script": {
-                        "type": "text/javascript",
-                        "exec": [
-                          "// Test script attribution: pattern adapted from Postman's official documentation:\r\n// Postman Inc., \"Write scripts to test API responses,\" Postman Learning Center, 2025.\r\n// https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-scripts/\r\n// [Accessed: 09-Oct-2026].\r\n\r\n   // Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\n   pm.test(\"Order reached Collected\", () => pm.expect(pm.response.json().Status).to.eql(\"Collected\"));"
-                        ]
-                      }
-                    }
-                  ],
-                  "request": {
-                    "method": "GET",
-                    "header": [],
-                    "url": {
-                      "raw": "{{baseUrl}}/orders/{{statusOrderDate}}/{{statusOrderId}}",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "orders",
-                        "{{statusOrderDate}}",
-                        "{{statusOrderId}}"
-                      ]
-                    }
-                  },
-                  "response": []
                 }
               ]
             },
@@ -1951,6 +1862,292 @@
               ]
             }
           ]
+        },
+        {
+          "name": "Thami - Docker",
+          "item": [
+            {
+              "name": "Thami - Docker Checks",
+              "item": [
+                {
+                  "name": "Seed Data",
+                  "item": [
+                    {
+                      "name": "Seed - Hot Drinks COF-007",
+                      "event": [
+                        {
+                          "listen": "test",
+                          "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Seed item created (200 or 201)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r\n});"
+                            ]
+                          }
+                        }
+                      ],
+                      "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\"partitionKey\":\"Hot Drinks\",\"rowKey\":\"COF-007\",\"name\":\"Iced Coffee\",\"description\":\"Chilled espresso over ice with a splash of milk\",\"price\":34.00,\"isAvailable\":true}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/menu",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "menu"
+                          ]
+                        }
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Seed - Hot Drinks COF-003",
+                      "event": [
+                        {
+                          "listen": "test",
+                          "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Seed item created (200 or 201)\", function () {\r\n    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r\n});"
+                            ]
+                          }
+                        }
+                      ],
+                      "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\"partitionKey\":\"Hot Drinks\",\"rowKey\":\"COF-003\",\"name\":\"Espresso\",\"description\":\"Single shot of strong espresso\",\"price\":25.00,\"isAvailable\":true}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/menu",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "menu"
+                          ]
+                        }
+                      },
+                      "response": []
+                    }
+                  ],
+                  "description": "Run once after a fresh docker compose up"
+                },
+                {
+                  "name": "Poison Mode Only",
+                  "item": [
+                    {
+                      "name": "Poison - Place Order",
+                      "event": [
+                        {
+                          "listen": "test",
+                          "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Order accepted (202)\", function () {\r\n    pm.response.to.have.status(202);\r\n});"
+                            ]
+                          }
+                        }
+                      ],
+                      "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\"OrderId\":\"ORD-2026-POISON1\",\"CustomerName\":\"Poison Test\",\"SelectedItemSKUs\":[\"COF-001\"],\"TotalPrice\":10,\"OrderTimestamp\":\"2026-10-12T10:15:00Z\"}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/orders/queue",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "orders",
+                            "queue"
+                          ]
+                        }
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Poison - Order Never Saved",
+                      "event": [
+                        {
+                          "listen": "test",
+                          "script": {
+                            "type": "text/javascript",
+                            "exec": [
+                              "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Order was never saved because the message went to the poison queue (404)\", function () {\r\n    pm.response.to.have.status(404);\r\n});"
+                            ]
+                          }
+                        }
+                      ],
+                      "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/orders/2026-10-12/ORD-2026-POISON1",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "orders",
+                            "2026-10-12",
+                            "ORD-2026-POISON1"
+                          ]
+                        }
+                      },
+                      "response": []
+                    }
+                  ],
+                  "description": "Run only when ENABLE_POISON_TEST is true."
+                },
+                {
+                  "name": "Health Check - Menu",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"API is reachable (200)\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Response time is under 2000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/menu",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "menu"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Health Check - Orders",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"API is reachable (200)\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Response time is under 2000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/orders",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "orders"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Health Check - Place Order",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"Order accepted (202)\", function () {\r\n    pm.response.to.have.status(202);\r\n});"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"CustomerName\":\"Health Check\",\"SelectedItemSKUs\":[\"COF-001\"],\"TotalPrice\":20}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/orders/queue",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "orders",
+                        "queue"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Health Check - Documents List",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "// Test script attribution: pattern adapted from Postman's documentation on writing test scripts (Postman, 2025).\r\npm.test(\"API is reachable (200)\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Response time is under 2000 ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/documents",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "documents"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
         }
       ]
     }
@@ -1970,14 +2167,6 @@
     },
     {
       "key": "lastCategory",
-      "value": ""
-    },
-    {
-      "key": "statusOrderId",
-      "value": ""
-    },
-    {
-      "key": "statusOrderDate",
       "value": ""
     }
   ]
