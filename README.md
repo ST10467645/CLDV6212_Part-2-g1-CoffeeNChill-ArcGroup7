@@ -26,11 +26,13 @@ What the mirror contains: every branch (`main`, `kandyce-part2-producer`, `krist
 ## Team Contributions and Commit Evidence
 Each member owns one of the three main parts of Part 2 (25 marks each in the brief) and committed from their own GitHub account on their own branch. Work was merged into `main` through pull requests, in an agreed order, so there were no merge conflicts.
 
+The commit and pull request amounts are based on the repository history available at the time that this ReadMe was written
+
 | Member | Branch | Part 2 area | Commits | Pull requests merged |
 |---|---|---|---|---|
-| Kandyce Smit (ST10467645) | `kandyce-part2-producer` | Queue producer: `SubmitOrder`, DTOs, validation, Base64 encoding, `host.json`, sample payloads, Postman collection, README | COMMITS_K | PRS_K |
-| Kristen Keve (ST10472683) | `kristen-part2-processor` | Queue trigger and order tracking: `ProcessOrderQueue`, Orders table, status life cycle, `UpdateOrderStatus`, poison queue | COMMITS_KR | PRS_KR |
-| Thamsanqa Ncube (ST10482062) | `thami-part2-compose` | Docker: `Dockerfile`, `docker-compose.yml`, Docker Hub `v2.0` images, network, volume, Docker Postman checks | COMMITS_T | PRS_T |
+| Kandyce Smit (ST10467645) | `kandyce-part2-producer` | Queue producer: `SubmitOrder`, DTOs, validation, Base64 encoding, `host.json`, sample payloads, Postman collection, README | 30 | 10 |
+| Kristen Keve (ST10472683) | `kristen-part2-processor` | Queue trigger and order tracking: `ProcessOrderQueue`, Orders table, status life cycle, `UpdateOrderStatus`, poison queue | 15 | 11 |
+| Thamsanqa Ncube (ST10482062) | `thami-part2-compose` | Docker: `Dockerfile`, `docker-compose.yml`, Docker Hub `v2.0` images, network, volume, Docker Postman checks | 11 | 7 |
 
 Anyone can reproduce the numbers from a clone with these commands (they work in PowerShell, Command Prompt and Git Bash):
 ```text
@@ -268,7 +270,7 @@ The Part 2 Postman collection is in `docs/Postman Collection/Part 2/`. It is a s
 
 ## Part 2 Video and Document
 - Video: https://youtu.be/iP3w9mEHbPM (shows `docker compose up`, the application starting, messages moving through the queue into the Orders table, and the Postman tests running)
-- Submission document: [CLDV6212 CoffeeNChill Part 2.pdf](docs/Final%20Submission%20Document/CLDV6212%20CoffeeNChill%20Part%202.pdf)
+- Submission document: [CLDV6212 CoffeeNChill Part 2.pdf](docs/Final%20Submission%20Document/Part2/CLDV6212%20CoffeeNChill%20Part%202.pdf)
 
 ### Video title cards
 The video opens and closes with an image and each presenter is introduced by a title card. All five images are AI-generated (see the image credits under AI Disclosure).
@@ -315,7 +317,7 @@ CoffeeNChillFunctions Part 2/          (repository root)
 │   ├── sample-payloads/               JSON order examples
 │   ├── screenshots_part2/             Kandyce/, kristen/, Thami/
 │   ├── staff-docs_TestDocuments/
-│   └── video-assets/                  intro.png, outro.png, card-kandyce.png, card-thami.png, card-kristen.png
+│   └── video-assets/                  Part2_Intro_Image.png, Outropng.png, Part2_Card_IntroToKandyce.png, Part2_Card_IntroToThami.png, Part2_Card_IntroToKristen.png
 ├── .gitignore
 ├── CoffeeNChillFunctions.csproj
 ├── CoffeeNChillFunctions.slnx
@@ -343,7 +345,7 @@ AI tools were used during this project:
 ### Image credits (AI-generated images)
 | Image (file in `docs/video-assets/`) | Where it is used | Generated with | Month | Prompt written by |
 |---|---|---|---|---|
-| `Part2_Intro_Image.png` | Start of the video | ChatGPT (OpenAI) | October 2026 | Kandyce Smit |
+| `Part2_Intro_Image.png` | Start of the video | ChatGPT (OpenAI) + Claude (Anthropic) | October 2026 | Kandyce Smit |
 | `Outropng.png` | End of the video | ChatGPT (OpenAI) | October 2026 | Kandyce Smit |
 | `Part2_Card_IntroToKandyce.png` | Title card before Kandyce's producer segment: pink coffee-cup mascot with envelopes for the Base64 queue messages | Claude (Anthropic) | October 2026 | Kandyce Smit |
 | `Part2_Card_IntroToThami.png` | Title card before Thami's Docker segment: blue coffee-cup mascot with a whale carrying containers for the v2.0 Docker Hub images | Claude (Anthropic) | October 2026 | Kandyce Smit |
