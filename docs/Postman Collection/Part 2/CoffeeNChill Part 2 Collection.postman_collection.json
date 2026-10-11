@@ -1797,7 +1797,7 @@
                     "header": [],
                     "body": {
                       "mode": "raw",
-                      "raw": "",
+                      "raw": "not json",
                       "options": {
                         "raw": {
                           "language": "text"
