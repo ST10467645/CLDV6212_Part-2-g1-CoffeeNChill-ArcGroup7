@@ -18,7 +18,7 @@ Both parts were built in repositories created through the university's GitHub Cl
 
 | | Private working repository (GitHub Classroom) | Public repository (submission) |
 |---|---|---|
-| Part 1 | the Part 1 Classroom repository | https://github.com/ST10467645/CLDV6212-g1-CoffeeNChill-ArcGroup7.git |
+| Part 1 | https://github.com/EMGPSD/cldv6212-g1-2026-poe-part1-st10467645.git | https://github.com/ST10467645/CLDV6212-g1-CoffeeNChill-ArcGroup7.git |
 | Part 2 | https://github.com/EMGPSD/Group_1_CLDV6212_Part-2-_Group_7_on_ARC.git | https://github.com/ST10467645/CLDV6212_Part-2-g1-CoffeeNChill-ArcGroup7.git |
 
 What the mirror contains: every branch (`main`, `kandyce-part2-producer`, `kristen-part2-processor`, `thami-part2-compose`), every commit with its original author and date, and the merge commits created when each pull request was merged. What it does **not** contain: the pull request pages and review comments, because GitHub keeps those only in the repository where they were opened. Screenshots of the merged pull requests are in the submission document. The Part 1 project was migrated into the Part 2 repository, so Part 2 contains all Part 1 code unchanged.
@@ -79,8 +79,8 @@ My contribution to Part 1 of the POE was the Docker setup. I wrote a multi-stage
 
 ## Part 1 Docker Images (v1.0)
 Built, tagged and pushed to public Docker Hub repositories (Docker, 2026a; Docker, 2026b). Part 1 runs on port **7071** (`http://localhost:7071/api`).
-- Functions: https://hub.docker.com/r/st10482062/coffeenchill-functions (`v1.0`)
-- Azurite: https://hub.docker.com/r/st10482062/coffeenchill-azurite (`v1.0`)
+- Functions: https://hub.docker.com/r/st10482062/coffeenchill-functions?tag=v1.0 (`v1.0`)
+- Azurite: https://hub.docker.com/r/st10482062/coffeenchill-azurite?tag=v1.0 (`v1.0`)
 
 ## Part 1 Testing
 Postman collections and the environment are in `docs/Postman Collection/Part 1/`: `CoffeeNChill Part 1 - Successful Tests`, `CoffeeNChill Part 1 - Invalid Tests` and the `Local Azurite` environment (`baseUrl` = `http://localhost:7071/api`). Import them, select **Local Azurite** and run each collection. Every request has a saved test script that follows Postman's test-script pattern (Postman, 2025).
@@ -107,7 +107,7 @@ Part 2 adds **asynchronous order processing**. A customer's order is validated a
 - **Added** `POST /api/orders/queue` (`SubmitOrder`): validation, JSON message, Base64 encoding, UTC timestamp and order number, 202 Accepted, error handling for an unavailable queue.
 - **Added** `ProcessOrderQueue`: queue-triggered function with Base64 decoding, saving to the `Orders` table and the 30-second status life cycle.
 - **Added** `GET /api/orders`, `GET /api/orders/{orderDate}/{orderId}`, `GET /api/orders/{orderId}` (status only) and `PUT /api/orders/{orderDate}/{orderId}/status`.
-- **Added** poison queue handling (`order-processing-queue-poison`) with `maxDequeueCount` set to 3 in `host.json`, and an optional `ENABLE_POISON_TEST` switch.
+- **Added** poison queue handling (`order-processing-queue-poison`) with `maxDequeueCount` set to 5 in `host.json`, and an optional `ENABLE_POISON_TEST` switch.
 - **Added** `docker-compose.yml`: Azurite and Functions, custom bridge network `coffeenchill-net`, volume `azurite-data`, Docker Hub `v2.0` images, API on port **7071**.
 - **Added** DTO classes in the `DTOs` folder (requests, responses and mappers) and sample JSON payloads in `docs/sample-payloads/`.
 - **Added** a new Postman collection and a new `baseUrl` environment for port 7071.
@@ -175,11 +175,11 @@ The images were built from the multi-stage `Dockerfile`, tagged `v2.0` and pushe
 - Azurite: https://hub.docker.com/r/st10482062/coffeenchill-azurite (`v1.0`, `v2.0`)
 
 ## Part 2 API Endpoints
-The base URL is `http://localhost:7071/api` in Docker. When running from Visual Studio it is `http://localhost:7071/api`.
+The base URL is `http://localhost:7071/api`, both in Docker and when running from Visual Studio (never run both at once).
 
 | Method | Route | Description | Success | Errors |
 |---|---|---|---|---|
-| POST | `/api/orders/queue` | Validate an order and place it on `order-processing-queue` | 202 | 400, 500 |
+| POST | `/api/orders/queue` | Validate an order and place it on `order-processing-queue` | 202 | 400, 503, 500 |
 | GET | `/api/orders` | List orders (optional `?status=Received`) | 200 | 400, 500 |
 | GET | `/api/orders/{orderDate}/{orderId}` | Get one order from the table | 200 | 404 |
 | GET | `/api/orders/{orderId}` | Get only the order id and current status | 200 | 404 |
@@ -205,8 +205,8 @@ Example request body (more in `docs/sample-payloads/`):
 | Total price 0 or negative | 400 with an `errors` list, nothing is queued |
 | Several problems at once | One 400 that lists all of them |
 | Valid order | 202 Accepted with the order id and date, the message is queued |
-| Queue or Azurite not reachable | The error is caught and logged, the reply is 500 within a few seconds, the app does not crash |
-| A bad message reaches the queue directly (for example added by hand) | The trigger tries 3 times, then Azure moves it to `order-processing-queue-poison`. The app keeps running |
+| Queue or Azurite not reachable | The error is caught and logged, the reply is 503 Service Unavailable within a few seconds (500 for any other unexpected error), the app does not crash |
+| A bad message reaches the queue directly (for example added by hand) | The trigger tries 5 times, then Azure moves it to `order-processing-queue-poison`. The app keeps running |
 | PUT with an unknown status word, or skipping a step | 400 Bad Request |
 | PUT or GET for an order that does not exist | 404 Not Found |
 
@@ -235,16 +235,16 @@ The producer turns the order into a JSON string and then into Base64 text before
 
 ## Part 2 Feature Descriptions
 ### Order Queue Producer (Kandyce)
-The order producer is the first half of the asynchronous ordering workflow. `SubmitOrder` is an HTTP-triggered function that accepts a new order as JSON at `POST /api/orders/queue` (Microsoft Learn, 2025b). Before anything is queued, it checks that the body is valid JSON, that the customer name is filled in, that at least one item is selected with no blank SKUs and that the total price is above zero. If anything is wrong, a 400 response lists every problem at once so the client can fix them in one go. When the client leaves them out, the server generates the order number and a UTC timestamp. The validated order is serialised to a JSON string and encoded to Base64 in the code, then sent to `order-processing-queue` with the Azure Storage Queues client library (Microsoft Learn, 2026q; Microsoft Learn, 2026w). `host.json` uses `messageEncoding: none` so that the queue stores exactly the Base64 text we send. If the queue cannot be reached, the function catches the error (Microsoft Learn, 2026r), logs it and returns a 500 within a few seconds instead of crashing. On success it answers 202 Accepted straight away, because the order is processed later in the background (IIE, 2026). `GetOrders`, `GetOrderById` and `GetOrderStatus` read the `Orders` table and return a clean response object (DTO), with a 404 for an unknown order and a 400 for an invalid status filter (Microsoft Learn, 2026c).
+The order producer is the first half of the asynchronous ordering workflow. `SubmitOrder` is an HTTP-triggered function that accepts a new order as JSON at `POST /api/orders/queue` (Microsoft Learn, 2025b). Before anything is queued, it checks that the body is valid JSON, that the customer name is filled in, that at least one item is selected with no blank SKUs and that the total price is above zero. If anything is wrong, a 400 response lists every problem at once so the client can fix them in one go. When the client leaves them out, the server generates the order number and a UTC timestamp. The validated order is serialised to a JSON string and encoded to Base64 in the code, then sent to `order-processing-queue` with the Azure Storage Queues client library (Microsoft Learn, 2026q; Microsoft Learn, 2026w). `host.json` uses `messageEncoding: none` so that the queue stores exactly the Base64 text we send. If the queue cannot be reached, the function catches the error (Microsoft Learn, 2026r), logs it and returns a 503 Service Unavailable within a few seconds instead of crashing. On success it answers 202 Accepted straight away, because the order is processed later in the background (IIE, 2026). `GetOrders`, `GetOrderById` and `GetOrderStatus` read the `Orders` table and return a clean response object (DTO), with a 404 for an unknown order and a 400 for an invalid status filter (Microsoft Learn, 2026c).
 
 ### Queue Trigger and Order Tracking (Kristen)
 `ProcessOrderQueue` is the second half of the workflow and runs automatically whenever a message arrives on `order-processing-queue` (Microsoft Learn, 2026g). It decodes the Base64 message back to JSON (Microsoft Learn, 2026o; Microsoft Learn, 2026p), reads it into an `Order` object (Microsoft Learn, 2026s) and saves an entry in the `Orders` table with the order date as the PartitionKey, the OrderId as the RowKey and the status `Received` (Microsoft Learn, 2026c; Microsoft Learn, 2026k). It then simulates the barista life cycle by waiting 30 seconds between statuses (Microsoft Learn, 2026j; Microsoft Learn, 2026m; Microsoft Learn, 2026n) and moving the order through `Preparing` and `Ready` to `Collected`, updating the table row at each step and logging every change. A `PUT` endpoint, `UpdateOrderStatus`, lets staff move an order forward one step at a time and returns a 400 for an invalid or skipped status and a 404 for an unknown order (Microsoft Learn, 2026t). If a message cannot be processed, the error is logged and the exception is rethrown, so after 5 attempts the runtime moves the message to `order-processing-queue-poison` instead of blocking the queue (Microsoft Learn, 2026l).
 
 ### Docker Compose Orchestration (Thami)
-One `docker-compose.yml` in the repository root starts the Azurite emulator and the Functions app together with a single `docker compose up` (Docker, 2026f). Both services use version-tagged `v2.0` images from Docker Hub, so a clean machine only needs Docker to run the whole system. The services share a custom bridge network so the Functions container reaches Azurite by the service name `azurite` rather than `localhost` (Docker, 2026e), and a named volume keeps Azurite's data when the containers are removed (Docker, 2026g). The images were built from the multi-stage Dockerfile, tagged `v2.0` and pushed to Docker Hub (Docker, 2026c; Docker, 2026d; Docker, 2026h; Microsoft Learn, 2026b). I also added the Docker checks to the Postman collection, which run against port 7071 with Visual Studio closed.
+One `docker-compose.yml` in the repository root starts the Azurite emulator and the Functions app together with a single `docker compose up` (Docker, 2026f). Both services use version-tagged `v2.0` images from Docker Hub, so a clean machine only needs Docker to run the whole system. The services share a custom bridge network so the Functions container reaches Azurite by the service name `azurite` rather than `localhost` (Docker, 2026e), and a named volume keeps Azurite's data when the containers are removed (Docker, 2026g). The images were built from the multi-stage Dockerfile, tagged `v2.0` and pushed to Docker Hub (Docker, 2026c; Docker, 2026d; Docker, 2026h; Microsoft Learn, 2026b). I also added the Docker checks to the Postman collection, which run with Visual Studio closed.
 
 ## Part 2 Testing
-All Part 2 files are in `docs/Postman Collection/Part 2/`: the collection **CoffeeNChill Part 2** and the environment **Docker Compose (7071)**, whose `baseUrl` is `http://localhost:7071/api`. Individual member test collections are in `docs/Postman Collection/Part 2/Individual Member Tests/`.
+The Part 2 Postman collection is in `docs/Postman Collection/Part 2/`. It is a separate collection from Part 1: the collection **CoffeeNChill Part 2** and the environment **Docker Compose (7071)**, whose `baseUrl` is `http://localhost:7071/api`. Individual member test collections are in `docs/Postman Collection/Part 2/Individual Member Tests/`.
 
 1. Start the stack with `docker compose up` and close Visual Studio.
 2. In Postman import the collection and the environment, and select **Docker Compose (7071)**.
@@ -267,10 +267,21 @@ All Part 2 files are in `docs/Postman Collection/Part 2/`: the collection **Coff
 **Evidence:** screenshots are in `docs/screenshots_part2/` (one folder per member) and in the submission document.
 
 ## Part 2 Video and Document
-- Video: YOUTUBE_LINK_HERE (shows `docker compose up`, the application starting, messages moving through the queue into the Orders table, and the Postman tests running)
-- Submission document: [CLDV6212_Part_2_Final_Submission.pdf](docs/Final%20Submission%20Document/CLDV6212_Part_2_Final_Submission.pdf)
+- Video: https://youtu.be/iP3w9mEHbPM (shows `docker compose up`, the application starting, messages moving through the queue into the Orders table, and the Postman tests running)
+- Submission document: [CLDV6212 CoffeeNChill Part 2.pdf](docs/Final%20Submission%20Document/CLDV6212%20CoffeeNChill%20Part%202.pdf)
 
-![Video intro](docs/video-assets/intro.png)
+### Video title cards
+The video opens and closes with an image and each presenter is introduced by a title card. All five images are AI-generated (see the image credits under AI Disclosure).
+
+| Intro | Outro |
+|---|---|
+| ![Video intro image (generated with ChatGPT)](docs/video-assets/Part2_Intro_Image.png) | ![Video outro image (generated with ChatGPT)](docs/video-assets/Outropng.png) |
+
+| Kandyce | Thami | Kristen |
+|---|---|---|
+| ![Kandyce title card (generated with Claude)](docs/video-assets/Part2_Card_IntroToKandyce.png) | ![Thami title card (generated with Claude)](docs/video-assets/Part2_Card_IntroToThami.png) | ![Kristen title card (generated with Claude)](docs/video-assets/Part2_Card_IntroToKristen.png) |
+
+*Intro and outro images: generated with ChatGPT (OpenAI). Presenter title cards: generated with Claude (Anthropic). Prompts written by the team.*
 
 Set the video quality to 1080p HD in YouTube's settings; it defaults to a lower resolution.
 
@@ -304,7 +315,7 @@ CoffeeNChillFunctions Part 2/          (repository root)
 │   ├── sample-payloads/               JSON order examples
 │   ├── screenshots_part2/             Kandyce/, kristen/, Thami/
 │   ├── staff-docs_TestDocuments/
-│   └── video-assets/                  intro.png, outro.png
+│   └── video-assets/                  intro.png, outro.png, card-kandyce.png, card-thami.png, card-kristen.png
 ├── .gitignore
 ├── CoffeeNChillFunctions.csproj
 ├── CoffeeNChillFunctions.slnx
@@ -321,8 +332,24 @@ CoffeeNChillFunctions Part 2/          (repository root)
 ## Important Notes
 - **Storage:** the brief mentions Azure File Share. On lecturer guidance, staff documents use Azure Blob Storage (container `staff-docs`) because File Share emulation is not reliably supported in Azurite.
 - **.NET version:** the project was scaffolded on .NET 10 and downgraded to .NET 9 for compatibility with the official Azure Functions Docker base images.
-- **Ports:** Azurite serves Blob on 10000, Queue on 10001 and Table on 10002. Part 2 Docker uses 7071 for the API; Part 1 and Visual Studio use 7071.
+- **Ports:** Azurite serves Blob on 10000, Queue on 10001 and Table on 10002. The API is on 7071 both in Docker and in Visual Studio, so never run both at once.
 - **Secrets:** the only connection string in the repository is the public Azurite development key, which is the same on every machine.
+
+## AI Disclosure
+AI tools were used during this project:
+- **Claude (Anthropic)** was used to generate the three presenter title cards shown in the video (see the image credits below).
+- **ChatGPT (OpenAI)** was used to generate the video intro and outro images.
+
+### Image credits (AI-generated images)
+| Image (file in `docs/video-assets/`) | Where it is used | Generated with | Month | Prompt written by |
+|---|---|---|---|---|
+| `Part2_Intro_Image.png` | Start of the video | ChatGPT (OpenAI) | October 2026 | Kandyce Smit |
+| `Outropng.png` | End of the video | ChatGPT (OpenAI) | October 2026 | Kandyce Smit |
+| `Part2_Card_IntroToKandyce.png` | Title card before Kandyce's producer segment: pink coffee-cup mascot with envelopes for the Base64 queue messages | Claude (Anthropic) | October 2026 | Kandyce Smit |
+| `Part2_Card_IntroToThami.png` | Title card before Thami's Docker segment: blue coffee-cup mascot with a whale carrying containers for the v2.0 Docker Hub images | Claude (Anthropic) | October 2026 | Kandyce Smit |
+| `Part2_Card_IntroToKristen.png` | Title card before Kristen's trigger segment: green coffee-cup mascot with the four status steps, Received to Collected, 30 seconds apart | Claude (Anthropic) | October 2026 | Kandyce Smit |
+
+The images are decorative video graphics. They contain no code or results, and the text on the cards (names, student numbers, roles) was checked against the contributions table above. They are credited here and not in the reference list because they are our own AI-generated material and not published sources.
 
 ## References
 Docker, 2026a. Build and push your first image. [Online]
